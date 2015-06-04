@@ -1,5 +1,5 @@
 # plugdb-api
-Minimal API to connect PlugDB
+Minimal and very basic API to connect PlugDB. Only for testing purposes.
 
 # Prerequisite
 You need a working PlugDB running on a virtual serial port to use it

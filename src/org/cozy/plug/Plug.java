@@ -5,10 +5,6 @@ import java.io.PrintWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JOptionPane;
-
 
 import test.jdbc.Tools;
 import test.runner.ITest;
@@ -32,16 +28,16 @@ public class Plug extends Tools implements ITest
 	}
 	
 	/* Insert doc ids and sharing rules */ 
-	public void plugInsert(List<String> docIds)
+	public void plugInsert(String[] docIds)
 	{
 		try 
 		{
 			// Insert the generated docs ids in plugdb 
-			for(int i=0; i<docIds.size(); i++)
-				q.queryInsert(Constants.INSERT_DOCID, docIds.get(i));
+			for(int i=0; i<docIds.length; i++)
+				q.queryInsert(Constants.INSERT_DOCID, docIds[i]);
 			
 			// Insert the rules
-			for(int i=0; i<docIds.size(); i++)
+			for(int i=0; i<docIds.length; i++)
 				q.queryInsert(Constants.INSERT_RULE, "1", String.valueOf((i+2)), "w", "none" );
 		
 		} catch (Exception e) {

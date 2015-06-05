@@ -12,7 +12,7 @@ Import the .jar in your project if you need it as it is.
 
 The public functions are : 
 * plugInit(String serialPort)
-* plugInsert(List<String> docIds)
+* plugInsert(String[] docIds)
 * plugSelect()
 * plugClose()
 * plugReset()

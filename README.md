@@ -16,6 +16,7 @@ The public functions are :
 * plugSelect()
 * plugClose()
 * plugReset()
+* plugFPAuthentication()
 
 ## Hack it
 

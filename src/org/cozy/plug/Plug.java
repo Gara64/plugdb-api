@@ -101,7 +101,7 @@ public class Plug extends Tools implements ITest
 		}
 	}
 	
-	public void plugAuthenticateByFP()
+	public void plugFPAuthentication()
 	{
 		FingerPrint fp = new FingerPrint(this);
 		fp.unauthenticate_fp();
@@ -156,7 +156,6 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(out, ps, db, perf);
 		
-		plugAuthenticateByFP();
 	}
 
 	

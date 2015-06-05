@@ -8,8 +8,7 @@ Generally /dev/ACM0 on Linux and COM1 on Windows
 # Use it
 Import the .jar in your project if you need it as it is.
 
-The database schema can be changed by generating another QEPCozy.java
-The associated queries can be added in Tools_dmsp.java and called in Queries.java
+
 
 The public functions are : 
 * plugInit(String serialPort)
@@ -18,4 +17,8 @@ The public functions are :
 * plugClose()
 * plugReset()
 
+# Hack it
 
+The database schema can be changed by generating another QEPCozy.java
+The associated queries can be added in Tools_dmsp.java and called in Queries.java
+The project is designed to work with the JDBC_API project

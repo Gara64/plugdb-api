@@ -17,4 +17,7 @@ public class Constants
 	public final static int PLUG_INITIALIZED = 51;
 	public final static int PLUG_TIMESTAMP_ERROR = 52;
 	
+	static public final int FULL_ACCESS_ID = 0;
+	static public final int RESTRICTED_ACCESS_ID = 0;
+	
 }

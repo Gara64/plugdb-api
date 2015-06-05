@@ -7,6 +7,9 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
+
 import test.jdbc.Tools;
 import test.runner.ITest;
 
@@ -98,6 +101,35 @@ public class Plug extends Tools implements ITest
 		}
 	}
 	
+	public void plugAuthenticateByFP()
+	{
+		FingerPrint fp = new FingerPrint(this);
+		fp.unauthenticate_fp();
+		try {
+			Thread.sleep( 200 );
+			fp.desactivate_fp();
+			Thread.sleep( 200 );
+			fp.activate_fp();
+			Thread.sleep( 200 );
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		int authId = fp.auth_fp();
+		if(authId == Constants.FULL_ACCESS_ID){
+			Globals.FULL_ACCESS = true;
+			System.out.println("You have been granted full access");
+		}
+		else if(authId == Constants.RESTRICTED_ACCESS_ID){
+			Globals.FULL_ACCESS = false;
+			System.out.println("You have been granted restricted access");
+		}
+		else
+			System.out.println("Authentication timed out, please try again");
+	}
+	
+	
+	
 	@Override
 	public void run(PrintWriter out, String dbmsHost) throws Exception {
 		// TODO Auto-generated method stub
@@ -123,6 +155,8 @@ public class Plug extends Tools implements ITest
 		}
 		
 		q = new Queries(out, ps, db, perf);
+		
+		plugAuthenticateByFP();
 	}
 
 	

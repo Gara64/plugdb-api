@@ -11,12 +11,12 @@ Import the .jar in your project if you need it as it is.
 
 
 The public functions are : 
-* plugInit(String serialPort)
-* plugInsert(String[] docIds)
-* plugSelect()
-* plugClose()
-* plugReset()
-* plugFPAuthentication()
+* void plugInit(String serialPort)
+* void plugInsert(String[] docIds)
+* String[] plugSelect()
+* void plugClose()
+* void plugReset()
+* int plugFPAuthentication()
 
 ## Hack it
 

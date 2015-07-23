@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 
 import test.jdbc.Tools;
+import test.jdbc.schemaIndexInfo.Tools_schemaIndexInfo;
 import test.runner.ITest;
 
 public class Plug extends Tools implements ITest
@@ -15,11 +16,13 @@ public class Plug extends Tools implements ITest
 	PreparedStatement ps;
 	Tools t;
 	PrintWriter output;
+	Tools_schemaIndexInfo sii;
 	
 	public Plug()
 	{
 		t =  new Tools();
 		output = new PrintWriter(java.lang.System.out);
+		
 	}
 	
 	public void plugInit(String dbmsHost) throws Exception
@@ -28,13 +31,13 @@ public class Plug extends Tools implements ITest
 	}
 	
 	/* Insert doc ids and sharing rules */ 
-	public void plugInsert(String[] docIds)
+	public void plugInsertDocs(String[] docIds)
 	{
 		try 
 		{
 			// Insert the generated docs ids in plugdb 
 			for(int i=0; i<docIds.length; i++)
-				q.queryInsert(Constants.INSERT_DOCID, docIds[i]);
+				q.queryInsert(Constants.INSERT_DOC, docIds[i]);
 			
 			// Insert the rules
 			for(int i=0; i<docIds.length; i++)
@@ -46,9 +49,31 @@ public class Plug extends Tools implements ITest
 		}
 	}
 	
+	/* Insert in Docs table  */ 
+	public void plugInsertDoc(String docId, String[] userParams) throws Exception
+	{
+		if (userParams != null) {
+			for(int i=0; i<userParams.length; i++)
+				q.queryInsert(Constants.INSERT_DOC, docId, userParams[i]);
+		}
+		else
+			q.queryInsert(Constants.INSERT_DOC, docId, "");
+	}
+	
+	/* Insert in Users table  */ 
+	public void plugInsertUser(String userID, String[] userParams) throws Exception
+	{
+		if (userParams != null) {
+			for(int i=0; i<userParams.length; i++)
+				q.queryInsert(Constants.INSERT_USER, userID, userParams[i]);
+		}
+		else
+			q.queryInsert(Constants.INSERT_USER, userID, "");
+	}
+	
 	
 	/* Select all the doc ids */
-	public String[] plugSelect()
+	public String[] plugSelectDocs()
 	{
 		ResultSet rs;
 		ArrayList<ArrayList<String>> tuples = new ArrayList<ArrayList<String>>();
@@ -73,6 +98,77 @@ public class Plug extends Tools implements ITest
 		return docIds;
 	}
 	
+	/* Select 1 Doc */
+	public String[] plugSelectSingleDoc(String docID)
+	{
+		ResultSet rs;
+		ArrayList<ArrayList<String>> tuples = new ArrayList<ArrayList<String>>();
+		try 
+		{
+			//For the moment, just select star on the docs to get the id
+			rs = q.querySelect(Constants.SELECT_DOCS_SELECT_BY_DOCID, docID);
+			tuples = Util.getTuples(rs);
+		
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if(tuples == null || tuples.isEmpty())
+			return null;
+		return Util.convertArrayListIntoString(tuples.get(0));
+	}
+	
+	/* Select 1 User */
+	public String[] plugSelectSingleUser(String userID)
+	{
+		ResultSet rs;
+		ArrayList<ArrayList<String>> tuples = new ArrayList<ArrayList<String>>();
+		try 
+		{
+			//For the moment, just select star on the docs to get the id
+			rs = q.querySelect(Constants.SELECT_USERS_SELECT_BY_USERID, userID);
+			tuples = Util.getTuples(rs);
+			System.out.println("size : " + tuples.size());
+			
+		
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if(tuples == null || tuples.isEmpty())
+			return null;
+		return Util.convertArrayListIntoString(tuples.get(0));
+	}
+	
+	/* Select all the users */
+	public String[] plugSelectUsers()
+	{
+		ResultSet rs;
+		ArrayList<ArrayList<String>> tuples = new ArrayList<ArrayList<String>>();
+		String[] userIds = null;
+
+		try 
+		{
+			//For the moment, just select star on the docs to get the id
+			rs = q.querySelect(Constants.SELECT_STAR_USERS);
+			tuples = Util.getTuples(rs);
+			
+			userIds = new String[tuples.size()];
+			for(int i=0;i<tuples.size();i++){
+				userIds[i] = tuples.get(i).get(1);
+			}
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return userIds;
+	}
+	
 	public void plugClose()
 	{
 	    try 
@@ -90,15 +186,17 @@ public class Plug extends Tools implements ITest
 	{
 		try {
 			Desinstall_DBMS_MetaData();
-			Install_DBMS_MetaData(QEPCozy.META.getBytes(), 0);
+			Install_DBMS_MetaData(SchemaCozy.META.getBytes(), 0);
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	public void plugFPAuthentication()
+	public int plugFPAuthentication()
 	{
+		int authId = -1;
 		FingerPrint fp = new FingerPrint(this);
 		fp.unauthenticate_fp();
 		try {
@@ -111,7 +209,8 @@ public class Plug extends Tools implements ITest
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		int authId = fp.auth_fp();
+		
+		authId = fp.auth_fp();
 		if(authId == Constants.FULL_ACCESS_ID){
 			Globals.FULL_ACCESS = true;
 			System.out.println("You have been granted full access");
@@ -122,6 +221,8 @@ public class Plug extends Tools implements ITest
 		}
 		else
 			System.out.println("Authentication timed out, please try again");
+		
+		return authId;
 	}
 	
 	
@@ -137,7 +238,7 @@ public class Plug extends Tools implements ITest
 		int plugState = Util.checksPlugState((org.inria.jdbc.Connection)db);
 		System.out.println("plug state : " + plugState);
 		if(plugState == Constants.PLUG_NOT_INITIALIZED){
-			plugReset(); //also desinstalls metadata, in case the state is reliable
+			plugReset(); //also desinstalls metadata, in case the state is not reliable
 			Util.makesPlugStateInit((org.inria.jdbc.Connection)db);
 		}
 		else if(plugState == Constants.PLUG_INITIALIZED)
@@ -152,7 +253,42 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(out, ps, db, perf);
 		
+		//test();
+		
+
 	}
 
-	
+	public void test() throws Exception {
+		
+		plugInsertUser("test1", null);
+		plugInsertUser("test2", null);
+		String[] str = plugSelectSingleUser("test1");
+		if (str != null) {
+		for(int i=0;i<str.length;i++)
+			System.out.println("user : " + str[i]);
+		}
+		else
+			System.out.println("nop");
+		
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_USERS), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS), out);
+		
+		/*String[] str = new String[1];
+		str[0] = "test";
+		plugInsert(str);
+		String[] res = plugSelect();
+		System.out.println("taille tableau : " + res.length);
+		for(int i=0;i<res.length;i++)
+			out.println("res : " + res[i]);
+		//lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS, ""), out);
+		*/
+		
+		int ret = Match("sharetest", "idtest");
+		System.out.println("match ret : " + ret);
+		
+		Save_DBMS_on_disk();
+		Shutdown_DBMS();
+		
+
+	}
 }

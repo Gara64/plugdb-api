@@ -5,9 +5,9 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-import javax.swing.JOptionPane;
-
+import org.inria.database.QEPng;
 
 import test.jdbc.Tools;
 
@@ -16,6 +16,7 @@ public class Queries extends Tools
 	java.sql.PreparedStatement ps;
 	int res, perf;
 	Connection dbase;
+	Statement stmt;
 	
 	
 	public Queries(PrintWriter out, java.sql.PreparedStatement ps, Connection dbase, int perf)
@@ -24,18 +25,41 @@ public class Queries extends Tools
 		this.ps = ps;
 		this.dbase = dbase;
 		this.perf = perf;
+		
+		
+		Class<?>[] execPlans = new Class[] {EP_ACL.class};
+		try
+		{
+			QEPng.loadExecutionPlans(COZY_QEP_IDs.class, execPlans);
+			QEPng.installExecutionPlans(dbase); //do this only on install
+			stmt = dbase.createStatement();
+			
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public ResultSet querySelect(int idQuery, String... param) throws Exception
 	{
 		ResultSet rs = null;
-		String query = "", p1="",p2="",p3="",p4="";
+		String query = "", p1=""; //, p2="",p3="",p4="", 
 	
 		if(param!=null){
 			p1 = param.length > 0 ? param[0] : "";
-		    p2 = param.length > 1 ? param[1] : "";
+		  /*  p2 = param.length > 1 ? param[1] : "";
 		    p3 = param.length > 2 ? param[2] : "";
 		    p4 = param.length > 3 ? param[3] : "";
+			*/
 		}
 		
 		try{
@@ -45,30 +69,27 @@ public class Queries extends Tools
 						
 				 case Constants.SELECT_STAR_BY_USERRULE:
 					query = "SELECT * FROM Rules r WHERE r.UserID = ? ";
-					ps = dbase.prepareStatement(QEPCozy.EP_SELECT_STAR_BY_USERRULE);
+					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_RULES_SELECT_STAR_BY_USERID);
 					rs = Tools_dmsp.Test_SELECT_BY_INT(Integer.parseInt(p1), ps);
 					break;
 					
 				 case Constants.SELECT_STAR_RULES:
 					 query = "SELECT * FROM Rules;";
-					ps = dbase.prepareStatement(QEPCozy.EP_SELECT_STAR_RULES);
-					rs = Tools_dmsp.Test_SELECT( ps);
+					rs = ((org.inria.jdbc.Statement)stmt).executeQuery(COZY_QEP_IDs.EP_ACL.EP_RULES_SELECT_STAR);
 					break; 
 				 case Constants.SELECT_STAR_USERS:
 					 query = "SELECT * FROM Users;";
-					ps = dbase.prepareStatement(QEPCozy.EP_SELECT_STAR_USERS);
-					rs = Tools_dmsp.Test_SELECT( ps);
+					 rs = ((org.inria.jdbc.Statement)stmt).executeQuery(COZY_QEP_IDs.EP_ACL.EP_USERS_SELECT_STAR);
 					break; 
 				 case Constants.SELECT_STAR_DOCS:
 					 query = "SELECT * FROM Docs;";
-					ps = dbase.prepareStatement(QEPCozy.EP_SELECT_STAR_DOCS);
-					rs = Tools_dmsp.Test_SELECT( ps);
+					 rs = ((org.inria.jdbc.Statement)stmt).executeQuery(COZY_QEP_IDs.EP_ACL.EP_DOCS_SELECT_STAR);
 					break; 
 					
-				 case Constants.SELECT_RULES_BY_USERID:
+				 case Constants.SELECT_RULES_CREDS_BY_USERID:
 					 query = "SELECT d.DocID, r.right, r.auth FROM RULES r, Docs d, Users u "
 					 		+ "WHERE u.UserID = ? AND u.IdGlobal = r.UserID AND r.DocID = d.IdGlobal";
-					 ps = dbase.prepareStatement(QEPCozy.EP_RULES_BY_USERID);
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_RULES_SELECT_CREDS_BY_USERID);
 					 rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
 					 break;
 					 
@@ -76,13 +97,30 @@ public class Queries extends Tools
 					 
 					 query = "SELECT d.DocID FROM RULES r, Docs d, Users u "
 					 		+ "WHERE u.UserID = ? AND u.IdGlobal = r.UserID AND r.DocID = d.IdGlobal";
-					 ps = dbase.prepareStatement(QEPCozy.EP_DOCID_BY_USERID);
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_RULES_SELECT_DOCID_BY_USERID);
 					 rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
+					 break;
+					 
+				 case Constants.SELECT_DOCS_SELECT_BY_DOCID:
+					 query = "SELECT * FROM DOCS WHERE DocID = ?";
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_DOCS_SELECT_BY_DOCID);
+					 rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
+					 break;
+					 
+				 case Constants.SELECT_USERS_SELECT_BY_USERID:
+					 query = "SELECT * FROM USERS WHERE UserID = ?";
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_USERS_SELECT_BY_USERID);
+					 rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
+					 break;
+					 
+				 case Constants.SELECT_FAKE_SELECT:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_FAKE_SELECT);
+					 rs = Tools_dmsp.Test_SELECT( ps);
 					 break;
 			}
 		}catch(Exception e)
 		{
-			JOptionPane.showMessageDialog(null, "Query error");
+			System.out.println("Query error : " + query);
 			e.printStackTrace();
 		}
 
@@ -91,12 +129,11 @@ public class Queries extends Tools
 	
 	public void queryInsert(int idInsert, String...param) throws Exception
 	{
-		boolean insert_ok = true;
-		
 		String p1 = param.length > 0 ? param[0] : "";
 	    String p2 = param.length > 1 ? param[1] : "";
 	    String p3 = param.length > 2 ? param[2] : "";
 	    String p4 = param.length > 3 ? param[3] : "";
+	    
 	    String query = "";
 
 	    try
@@ -104,17 +141,20 @@ public class Queries extends Tools
 		    switch(idInsert)
 			{
 				case Constants.INSERT_RULE:
-					ps = dbase.prepareStatement(QEPCozy.EP_RULE_INSERT);
+					query = "INSERT INTO RULES (UserID, DocID, RIGHT, AUTH) VALUES (?,?,?,?)";
+					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_RULES_INSERT);
 					Tools_dmsp.INSERT_RULE(Integer.parseInt(p1),Integer.parseInt(p2)
 							,p3,p4, ps);
 					break;
-				case Constants.INSERT_USERID:
-					ps = dbase.prepareStatement(QEPCozy.EP_USER_INSERT);
-					Tools_dmsp.INSERT_USER(p1, ps);
+				case Constants.INSERT_USER:
+					query = "INSERT INTO USERS (UserID, UserDesc) VALUES(?,?)";
+					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_USERS_INSERT);
+					Tools_dmsp.INSERT_USER(p1, p2, ps);
 					break;
-				case Constants.INSERT_DOCID:
-					ps = dbase.prepareStatement(QEPCozy.EP_DOC_INSERT);
-					Tools_dmsp.INSERT_DOC(p1, ps);
+				case Constants.INSERT_DOC:
+					query = "INSERT INTO DOCS (DocID, UserDesc) VALUES(?,?)";
+					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_DOCS_INSERT);
+					Tools_dmsp.INSERT_DOC(p1, p2, ps);
 					break;
 				default:
 					break;
@@ -123,7 +163,7 @@ public class Queries extends Tools
 		//in case there is a problem with the params
 	    }catch(Exception e)
 	    {
-	    	JOptionPane.showMessageDialog(null, "incorrect query format");
+	    	System.out.println("Query error : " + query);
 	    	e.printStackTrace();
 	    	return;
 	    }

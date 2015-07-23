@@ -687,17 +687,19 @@ public class Tools_dmsp {
 			int res = Pstmt.executeUpdate();
 			return res;
 		}
-		public static int INSERT_USER(String StringVal1, 
+		public static int INSERT_USER(String StringVal1, String StringVal2,
 				java.sql.PreparedStatement Pstmt) throws Exception
 		{
 			Pstmt.setString(1, StringVal1);
+			Pstmt.setString(2, StringVal2);
 			int res = Pstmt.executeUpdate();
 			return res;
 		}
-		public static int INSERT_DOC(String StringVal1, 
+		public static int INSERT_DOC(String StringVal1, String StringVal2,
 				java.sql.PreparedStatement Pstmt) throws Exception
 		{
 			Pstmt.setString(1, StringVal1);
+			Pstmt.setString(2, StringVal2);
 			int res = Pstmt.executeUpdate();
 			return res;
 		}

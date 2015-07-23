@@ -77,5 +77,10 @@ public class Util
 	{
 		db.setGlobalTimestamp(2);
 	}
+	
+	public static String[] convertArrayListIntoString(ArrayList<String> list)
+	{
+		return list.toArray(new String[list.size()]);
+	}
 
 }

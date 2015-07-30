@@ -19,7 +19,7 @@ public class Queries extends Tools
 	Statement stmt;
 	
 	
-	public Queries(PrintWriter out, java.sql.PreparedStatement ps, Connection dbase, int perf)
+	public Queries(int plugState, PrintWriter out, java.sql.PreparedStatement ps, Connection dbase, int perf)
 	{
 		this.out = out;
 		this.ps = ps;
@@ -31,7 +31,8 @@ public class Queries extends Tools
 		try
 		{
 			QEPng.loadExecutionPlans(COZY_QEP_IDs.class, execPlans);
-			QEPng.installExecutionPlans(dbase); //do this only on install
+			if( plugState == Constants.PLUG_NOT_INITIALIZED )
+				QEPng.installExecutionPlans(dbase); //do this only on install
 			stmt = dbase.createStatement();
 			
 		} catch (IllegalArgumentException e) {
@@ -52,11 +53,12 @@ public class Queries extends Tools
 	public ResultSet querySelect(int idQuery, String... param) throws Exception
 	{
 		ResultSet rs = null;
-		String query = "", p1=""; //, p2="",p3="",p4="", 
+		String query = "", p1="", p2=""; //p3="",p4="", 
 	
 		if(param!=null){
 			p1 = param.length > 0 ? param[0] : "";
-		  /*  p2 = param.length > 1 ? param[1] : "";
+		    p2 = param.length > 1 ? param[1] : "";
+		    /*
 		    p3 = param.length > 2 ? param[2] : "";
 		    p4 = param.length > 3 ? param[3] : "";
 			*/
@@ -66,16 +68,9 @@ public class Queries extends Tools
 		
 			switch(idQuery)
 			{
-						
-				 case Constants.SELECT_STAR_BY_USERRULE:
-					query = "SELECT * FROM Rules r WHERE r.UserID = ? ";
-					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_RULES_SELECT_STAR_BY_USERID);
-					rs = Tools_dmsp.Test_SELECT_BY_INT(Integer.parseInt(p1), ps);
-					break;
-					
-				 case Constants.SELECT_STAR_RULES:
-					 query = "SELECT * FROM Rules;";
-					rs = ((org.inria.jdbc.Statement)stmt).executeQuery(COZY_QEP_IDs.EP_ACL.EP_RULES_SELECT_STAR);
+				 case Constants.SELECT_STAR_ACL:
+					 query = "SELECT * FROM ACL;";
+					rs = ((org.inria.jdbc.Statement)stmt).executeQuery(COZY_QEP_IDs.EP_ACL.EP_ACL_SELECT_STAR);
 					break; 
 				 case Constants.SELECT_STAR_USERS:
 					 query = "SELECT * FROM Users;";
@@ -85,38 +80,67 @@ public class Queries extends Tools
 					 query = "SELECT * FROM Docs;";
 					 rs = ((org.inria.jdbc.Statement)stmt).executeQuery(COZY_QEP_IDs.EP_ACL.EP_DOCS_SELECT_STAR);
 					break; 
+				 case Constants.SELECT_STAR_SHARES:
+					 query = "SELECT * FROM Shares;";
+					 rs = ((org.inria.jdbc.Statement)stmt).executeQuery(COZY_QEP_IDs.EP_ACL.EP_SHARES_SELECT_STAR);
+					break; 
 					
-				 case Constants.SELECT_RULES_CREDS_BY_USERID:
-					 query = "SELECT d.DocID, r.right, r.auth FROM RULES r, Docs d, Users u "
-					 		+ "WHERE u.UserID = ? AND u.IdGlobal = r.UserID AND r.DocID = d.IdGlobal";
-					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_RULES_SELECT_CREDS_BY_USERID);
+				 case Constants.SELECT_DOCID_BY_SHARINGRULE:
+					query = "SELECT IdGlobal, DocID, UserParam FROM Docs WHERE SharingRule = ?";
+					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_DOCS_SELECT_DOCID_BY_SHARINGRULE);
+					rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
+					break;
+				 case Constants.SELECT_USERID_BY_SHARINGRULE:
+						query = "SELECT IdGlobal, UserID, UserParam FROM Users WHERE SharingRule = ?";
+						ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_USERS_SELECT_USERID_BY_SHARINGRULE);
+						rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
+						break;
+				 case Constants.SELECT_USERPARAMS_BY_DOCID:
+						query = "SSELECT IdGlobal, UserParam FROM Docs WHERE DocID = ? AND SharingRule = ?";
+						ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_DOCS_SELECT_USERPARAMS_BY_DOCID);
+						rs = Tools_dmsp.Test_SELECT_BY_STRING_AND_STRING(p1, p2, ps);
+						break;
+				 case Constants.SELECT_USERPARAMS_BY_USERID:
+						query = "SELECT IdGlobal, UserParam FROM Users WHERE UserID = ? AND SharingRule = ?";
+						ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_USERS_SELECT_USERPARAMS_BY_USERID);
+						rs = Tools_dmsp.Test_SELECT_BY_STRING_AND_STRING(p1, p2, ps);
+						break;
+				 case Constants.SELECT_ACL_BY_SHAREID:
+						query = "SELECT d.DocID, u.UserID FROM ACL a, Docs d, Users u, Shares s WHERE s.ShareID = ? AND s.IdGlobal = a.Share and a.User = u.IdGlobal AND a.Doc = d.IdGlobal";
+						ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_ACL_SELECT_BY_SHAREID);
+						rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
+						break;
+						
+				 case Constants.SELECT_STAR_ACL_BY_USER:
+						query = "SELECT * FROM ACL r WHERE r.User = ? ";
+						ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_ACL_SELECT_STAR_BY_USER);
+						rs = Tools_dmsp.Test_SELECT_BY_INT(Integer.parseInt(p1), ps);
+						
+				 case Constants.SELECT_ACL_CREDS_BY_USERID:
+					 query = "SELECT d.DocID, a.right, a.auth FROM ACL a, Docs d, Users u WHERE u.UserID = ? AND u.IdGlobal = a.User AND a.Doc = d.IdGlobal";
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_ACL_SELECT_CREDS_BY_USERID);
 					 rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
 					 break;
 					 
 				 case Constants.SELECT_DOCID_BY_USERID:
 					 
-					 query = "SELECT d.DocID FROM RULES r, Docs d, Users u "
-					 		+ "WHERE u.UserID = ? AND u.IdGlobal = r.UserID AND r.DocID = d.IdGlobal";
-					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_RULES_SELECT_DOCID_BY_USERID);
+					 query = "SELECT d.DocID FROM ACL a, Docs d, Users u WHERE u.UserID = ? AND u.IdGlobal = a.User AND a.Doc = d.IdGlobal";
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_ACL_SELECT_DOCID_BY_USERID);
 					 rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
 					 break;
 					 
-				 case Constants.SELECT_DOCS_SELECT_BY_DOCID:
+				 case Constants.SELECT_DOCS_BY_DOCID:
 					 query = "SELECT * FROM DOCS WHERE DocID = ?";
 					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_DOCS_SELECT_BY_DOCID);
 					 rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
 					 break;
 					 
-				 case Constants.SELECT_USERS_SELECT_BY_USERID:
+				 case Constants.SELECT_USERS_BY_USERID:
 					 query = "SELECT * FROM USERS WHERE UserID = ?";
 					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_USERS_SELECT_BY_USERID);
 					 rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
 					 break;
 					 
-				 case Constants.SELECT_FAKE_SELECT:
-					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_FAKE_SELECT);
-					 rs = Tools_dmsp.Test_SELECT( ps);
-					 break;
 			}
 		}catch(Exception e)
 		{
@@ -133,28 +157,33 @@ public class Queries extends Tools
 	    String p2 = param.length > 1 ? param[1] : "";
 	    String p3 = param.length > 2 ? param[2] : "";
 	    String p4 = param.length > 3 ? param[3] : "";
-	    
+	    String p5 = param.length > 4 ? param[4] : "";
 	    String query = "";
 
 	    try
 	    {
 		    switch(idInsert)
 			{
-				case Constants.INSERT_RULE:
-					query = "INSERT INTO RULES (UserID, DocID, RIGHT, AUTH) VALUES (?,?,?,?)";
-					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_RULES_INSERT);
-					Tools_dmsp.INSERT_RULE(Integer.parseInt(p1),Integer.parseInt(p2)
-							,p3,p4, ps);
+				case Constants.INSERT_ACL:
+					query = "INSERT INTO ACL (Share, User, Doc, Right, Auth) VALUES (?,?,?,?,?)";
+					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_ACL_INSERT);
+					Tools_dmsp.INSERT_ACL(Integer.parseInt(p1),Integer.parseInt(p2), Integer.parseInt(p3)
+							,p4,p5, ps);
 					break;
 				case Constants.INSERT_USER:
-					query = "INSERT INTO USERS (UserID, UserDesc) VALUES(?,?)";
+					query = "INSERT INTO Users (UserID, SharingRule, UserParam) VALUES(?,?,?)";
 					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_USERS_INSERT);
-					Tools_dmsp.INSERT_USER(p1, p2, ps);
+					Tools_dmsp.INSERT_USER(p1, p2, p3, ps);
 					break;
 				case Constants.INSERT_DOC:
-					query = "INSERT INTO DOCS (DocID, UserDesc) VALUES(?,?)";
+					query = "INSERT INTO Docs (DocID, SharingRule, UserParam) VALUES(?,?,?)";
 					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_DOCS_INSERT);
-					Tools_dmsp.INSERT_DOC(p1, p2, ps);
+					Tools_dmsp.INSERT_DOC(p1, p2, p3, ps);
+					break;
+				case Constants.INSERT_SHARE:
+					query = "INSERT INTO Shares (ShareID, Desc) VALUES(?,?)";
+					ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_SHARES_INSERT);
+					Tools_dmsp.INSERT_SHARE(p1, p2, ps);
 					break;
 				default:
 					break;

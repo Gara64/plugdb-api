@@ -677,25 +677,36 @@ public class Tools_dmsp {
 		}
 		
 		//--------------- PlugTest -----------------
-		public static int INSERT_RULE(int IntVal1, int IntVal2, String StringVal1, String StringVal2, 
+		public static int INSERT_ACL(int IntVal1, int IntVal2, int IntVal3, String StringVal1, String StringVal2, 
 				java.sql.PreparedStatement Pstmt) throws Exception
 		{
 			Pstmt.setInt(1, IntVal1);
 			Pstmt.setInt(2, IntVal2);
-			Pstmt.setString(3, StringVal1);
-			Pstmt.setString(4, StringVal2);
+			Pstmt.setInt(3, IntVal3);
+			Pstmt.setString(4, StringVal1);
+			Pstmt.setString(5, StringVal2);
 			int res = Pstmt.executeUpdate();
 			return res;
 		}
-		public static int INSERT_USER(String StringVal1, String StringVal2,
+		public static int INSERT_USER(String StringVal1, String StringVal2, String StringVal3,
 				java.sql.PreparedStatement Pstmt) throws Exception
 		{
 			Pstmt.setString(1, StringVal1);
 			Pstmt.setString(2, StringVal2);
+			Pstmt.setString(3, StringVal3);
 			int res = Pstmt.executeUpdate();
 			return res;
 		}
-		public static int INSERT_DOC(String StringVal1, String StringVal2,
+		public static int INSERT_DOC(String StringVal1, String StringVal2, String StringVal3,
+				java.sql.PreparedStatement Pstmt) throws Exception
+		{
+			Pstmt.setString(1, StringVal1);
+			Pstmt.setString(2, StringVal2);
+			Pstmt.setString(3, StringVal3);
+			int res = Pstmt.executeUpdate();
+			return res;
+		}
+		public static int INSERT_SHARE(String StringVal1, String StringVal2,
 				java.sql.PreparedStatement Pstmt) throws Exception
 		{
 			Pstmt.setString(1, StringVal1);

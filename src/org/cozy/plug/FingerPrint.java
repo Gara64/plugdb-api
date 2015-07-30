@@ -4,6 +4,8 @@ package org.cozy.plug;
 
 public class FingerPrint
 {
+	/* COMMENT BECAUSE OF JDBC */
+	/* 
 	int fId;
 	Plug p;
 	
@@ -62,5 +64,5 @@ public class FingerPrint
 		return fId;
 	}
 	
-	
+	*/
 }

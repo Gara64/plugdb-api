@@ -4,11 +4,19 @@ package org.cozy.plug;
 import java.io.PrintWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import test.jdbc.Tools;
-import test.jdbc.schemaIndexInfo.Tools_schemaIndexInfo;
 import test.runner.ITest;
+
+
+//import org.inria.jdbc.DBMS;
+
+/*import test.jdbc.Tools;
+import test.jdbc.schemaIndexInfo.Tools_schemaIndexInfo;
+import test.runnerTCP.ITest;
+*/
 
 public class Plug extends Tools implements ITest
 {
@@ -16,7 +24,7 @@ public class Plug extends Tools implements ITest
 	PreparedStatement ps;
 	Tools t;
 	PrintWriter output;
-	Tools_schemaIndexInfo sii;
+	//Tools_schemaIndexInfo sii;
 	
 	public Plug()
 	{
@@ -37,11 +45,9 @@ public class Plug extends Tools implements ITest
 		{
 			// Insert the generated docs ids in plugdb 
 			for(int i=0; i<docIds.length; i++)
-				q.queryInsert(Constants.INSERT_DOC, docIds[i]);
+				q.queryInsert(Constants.INSERT_DOC, docIds[i], "", "");
 			
-			// Insert the rules
-			for(int i=0; i<docIds.length; i++)
-				q.queryInsert(Constants.INSERT_RULE, "1", String.valueOf((i+2)), "w", "none" );
+			Save_DBMS_on_disk();
 		
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -50,25 +56,34 @@ public class Plug extends Tools implements ITest
 	}
 	
 	/* Insert in Docs table  */ 
-	public void plugInsertDoc(String docId, String[] userParams) throws Exception
+	public void plugInsertDoc(String docId, String sharingRule, String[] userParams) throws Exception
 	{
 		if (userParams != null) {
 			for(int i=0; i<userParams.length; i++)
-				q.queryInsert(Constants.INSERT_DOC, docId, userParams[i]);
+				q.queryInsert(Constants.INSERT_DOC, docId, sharingRule, userParams[i]);
 		}
 		else
-			q.queryInsert(Constants.INSERT_DOC, docId, "");
+			q.queryInsert(Constants.INSERT_DOC, docId, sharingRule, "");
+		Save_DBMS_on_disk();
 	}
 	
 	/* Insert in Users table  */ 
-	public void plugInsertUser(String userID, String[] userParams) throws Exception
+	public void plugInsertUser(String userID, String sharingRule, String[] userParams) throws Exception
 	{
 		if (userParams != null) {
 			for(int i=0; i<userParams.length; i++)
-				q.queryInsert(Constants.INSERT_USER, userID, userParams[i]);
+				q.queryInsert(Constants.INSERT_USER, userID, sharingRule, userParams[i]);
 		}
 		else
-			q.queryInsert(Constants.INSERT_USER, userID, "");
+			q.queryInsert(Constants.INSERT_USER, userID, sharingRule, "");
+		Save_DBMS_on_disk();
+	}
+	
+	/* Insert in Shares table  */ 
+	public void plugInsertShare(String shareID, String desc) throws Exception
+	{
+		q.queryInsert(Constants.INSERT_SHARE, shareID, desc);
+		Save_DBMS_on_disk();
 	}
 	
 	
@@ -106,7 +121,7 @@ public class Plug extends Tools implements ITest
 		try 
 		{
 			//For the moment, just select star on the docs to get the id
-			rs = q.querySelect(Constants.SELECT_DOCS_SELECT_BY_DOCID, docID);
+			rs = q.querySelect(Constants.SELECT_DOCS_BY_DOCID, docID);
 			tuples = Util.getTuples(rs);
 		
 		} catch (Exception e) {
@@ -127,7 +142,7 @@ public class Plug extends Tools implements ITest
 		try 
 		{
 			//For the moment, just select star on the docs to get the id
-			rs = q.querySelect(Constants.SELECT_USERS_SELECT_BY_USERID, userID);
+			rs = q.querySelect(Constants.SELECT_USERS_BY_USERID, userID);
 			tuples = Util.getTuples(rs);
 			System.out.println("size : " + tuples.size());
 			
@@ -169,6 +184,48 @@ public class Plug extends Tools implements ITest
 		return userIds;
 	}
 	
+	public String[][] plugSelectACL(String shareID)
+	{
+		ResultSet rs;
+		ArrayList<ArrayList<String>> tuples = new ArrayList<ArrayList<String>>();
+		String[][] acl = null;
+
+		try 
+		{
+			//For the moment, just select star on the docs to get the id
+			rs = q.querySelect(Constants.SELECT_ACL_BY_SHAREID, shareID); 
+			tuples = Util.getTuples(rs);
+			
+			acl = new String[tuples.size()][2];
+			for(int i=0;i<tuples.size();i++){
+				acl[i][0] = tuples.get(i).get(0);
+				acl[i][1] = tuples.get(i).get(1);
+			}
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return acl;
+	}
+	
+	public String[][] plugMatch(int matchingType, String shareID, String matchID) throws Exception
+	{
+		String acl[][] = null;
+		
+		int ret = Match( matchingType, shareID, matchID );
+		if( ret <= 0)
+			return null;
+		else {
+			Save_DBMS_on_disk();
+			acl = plugSelectACL(shareID);
+			return acl;
+		}
+			
+	}
+	
 	public void plugClose()
 	{
 	    try 
@@ -194,7 +251,8 @@ public class Plug extends Tools implements ITest
 		}
 	}
 	
-	public int plugFPAuthentication()
+	/* COMMENT BECAUSE OF JDBC */
+	/*public int plugFPAuthentication()
 	{
 		int authId = -1;
 		FingerPrint fp = new FingerPrint(this);
@@ -223,7 +281,7 @@ public class Plug extends Tools implements ITest
 			System.out.println("Authentication timed out, please try again");
 		
 		return authId;
-	}
+	}*/
 	
 	
 	
@@ -237,6 +295,7 @@ public class Plug extends Tools implements ITest
 		
 		int plugState = Util.checksPlugState((org.inria.jdbc.Connection)db);
 		System.out.println("plug state : " + plugState);
+		
 		if(plugState == Constants.PLUG_NOT_INITIALIZED){
 			plugReset(); //also desinstalls metadata, in case the state is not reliable
 			Util.makesPlugStateInit((org.inria.jdbc.Connection)db);
@@ -251,44 +310,62 @@ public class Plug extends Tools implements ITest
 			System.exit(1);
 		}
 		
-		q = new Queries(out, ps, db, perf);
+		q = new Queries(plugState, out, ps, db, perf);
 		
-		//test();
 		
 
 	}
 
 	public void test() throws Exception {
 		
-		plugInsertUser("test1", null);
-		plugInsertUser("test2", null);
-		String[] str = plugSelectSingleUser("test1");
-		if (str != null) {
-		for(int i=0;i<str.length;i++)
-			System.out.println("user : " + str[i]);
-		}
-		else
-			System.out.println("nop");
+		plugInsertUser("test1", "1", null);
+		plugInsertUser("test2", "2", null);
+		plugInsertDoc("doc1", "1", null);
+		plugInsertDoc("doc2", "2", null);
 		
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_USERS), out);
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS), out);
-		
-		/*String[] str = new String[1];
-		str[0] = "test";
-		plugInsert(str);
-		String[] res = plugSelect();
-		System.out.println("taille tableau : " + res.length);
-		for(int i=0;i<res.length;i++)
-			out.println("res : " + res[i]);
-		//lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS, ""), out);
-		*/
-		
-		int ret = Match("sharetest", "idtest");
-		System.out.println("match ret : " + ret);
+				
+		//int ret = Match("sharetest", "idtest");
+		//System.out.println("match ret : " + ret);
 		
 		Save_DBMS_on_disk();
 		Shutdown_DBMS();
+	}
+	
+	public void testMatch() throws Exception {
 		
-
+		plugInsertShare("sharingid1", "blah");
+		
+		for(int i=0;i<10;i++) {
+			plugInsertUser("test1", "sharingid1", new String[]{"toto"});
+			plugInsertUser("test2", "sharingid1", new String[]{"tata"});
+		}
+		
+		plugInsertDoc("doctest", "sharingid1", new String[]{"toto"});
+		
+		
+		int ret = Match(Constants.MATCH_USERS, "sharingid1", "doctest");
+		System.out.println("match ret : " + ret);
+		
+		
+		String[][] acl = plugMatch(Constants.MATCH_USERS, "sharingid1", "doctest");
+		if(acl != null) {
+			for(int i=0;i<acl.length;i++) {
+				System.out.println("doc id : " + acl[i][0]);
+				System.out.println("user id : " + acl[i][1]);
+	
+			}
+		}
+		
+		/*lireResultSet(q.querySelect(Constants.SELECT_ACL_BY_SHAREID, "sharingid1"), out);
+		 * lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_USERS ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS ), out);
+	*/
+		
+		//Save_DBMS_on_disk();
+		Shutdown_DBMS();
 	}
 }

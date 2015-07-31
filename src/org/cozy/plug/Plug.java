@@ -8,15 +8,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import test.jdbc.Tools;
+//import test.runnerTCP.ITest;
 import test.runner.ITest;
-
 
 //import org.inria.jdbc.DBMS;
 
-/*import test.jdbc.Tools;
-import test.jdbc.schemaIndexInfo.Tools_schemaIndexInfo;
-import test.runnerTCP.ITest;
-*/
+//import test.jdbc.Tools;
+//import test.jdbc.schemaIndexInfo.Tools_schemaIndexInfo;
+
 
 public class Plug extends Tools implements ITest
 {
@@ -58,6 +57,7 @@ public class Plug extends Tools implements ITest
 	/* Insert in Docs table  */ 
 	public void plugInsertDoc(String docId, String sharingRule, String[] userParams) throws Exception
 	{
+		
 		if (userParams != null) {
 			for(int i=0; i<userParams.length; i++)
 				q.queryInsert(Constants.INSERT_DOC, docId, sharingRule, userParams[i]);
@@ -192,7 +192,6 @@ public class Plug extends Tools implements ITest
 
 		try 
 		{
-			//For the moment, just select star on the docs to get the id
 			rs = q.querySelect(Constants.SELECT_ACL_BY_SHAREID, shareID); 
 			tuples = Util.getTuples(rs);
 			
@@ -312,7 +311,7 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(plugState, out, ps, db, perf);
 		
-		
+		//testMatch();
 
 	}
 
@@ -335,21 +334,11 @@ public class Plug extends Tools implements ITest
 	
 	public void testMatch() throws Exception {
 		
-		plugInsertShare("sharingid1", "blah");
-		
-		for(int i=0;i<10;i++) {
-			plugInsertUser("test1", "sharingid1", new String[]{"toto"});
-			plugInsertUser("test2", "sharingid1", new String[]{"tata"});
-		}
-		
-		plugInsertDoc("doctest", "sharingid1", new String[]{"toto"});
-		
-		
-		int ret = Match(Constants.MATCH_USERS, "sharingid1", "doctest");
-		System.out.println("match ret : " + ret);
-		
-		
-		String[][] acl = plugMatch(Constants.MATCH_USERS, "sharingid1", "doctest");
+		//shareid f129788c94c18b3148adb24122025e4
+		//userid c056eb163853e0e4544224261100d568
+		//docid c056eb163853e0e4544224261100eb01
+	
+		String[][] acl = plugMatch(Constants.MATCH_USERS, "f129788c94c18b3148adb24122025e43", "f61e75131ee0df2aa74754e52e00014a");
 		if(acl != null) {
 			for(int i=0;i<acl.length;i++) {
 				System.out.println("doc id : " + acl[i][0]);
@@ -358,14 +347,44 @@ public class Plug extends Tools implements ITest
 			}
 		}
 		
-		/*lireResultSet(q.querySelect(Constants.SELECT_ACL_BY_SHAREID, "sharingid1"), out);
-		 * lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_USERS ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS ), out);
+		
+		/*plugInsertShare("f129788c94c18b3148adb24122025e4", "blah");
+		
+		for(int i=0;i<1;i++) {
+			plugInsertUser("c056eb163853e0e4544224261100d568", "f129788c94c18b3148adb24122025e4", new String[]{});
+			plugInsertUser("c056eb163853e0e4544224261100d569", "f129788c94c18b3148adb24122025e4", new String[]{"tata"});
+		}
+	
+		plugInsertDoc("c056eb163853e0e4544224261100eb01", "f129788c94c18b3148adb24122025e4", new String[]{});
+		
+		
+		int ret = Match(Constants.MATCH_USERS, "sharingid1", "doctest");
+		System.out.println("match ret : " + ret);
+		
+		
+		String[][] acl = plugMatch(Constants.MATCH_USERS, "f129788c94c18b3148adb24122025e4", "c056eb163853e0e4544224261100eb01");
+		if(acl != null) {
+			for(int i=0;i<acl.length;i++) {
+				System.out.println("doc id : " + acl[i][0]);
+				System.out.println("user id : " + acl[i][1]);
+	
+			}
+		}*/
+
+	/*
+		lireResultSet(q.querySelect(Constants.SELECT_ACL_BY_SHAREID, "sharingid1"), out);
+		lireResultSet(q.querySelect(Constants.SELECT_ACL_BY_SHAREID, "sharingid1"), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL ), out);
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES ), out);
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_USERS ), out);
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS ), out);
 	*/
 		
 		//Save_DBMS_on_disk();
-		Shutdown_DBMS();
+		//Shutdown_DBMS();
 	}
 }

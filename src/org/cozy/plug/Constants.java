@@ -26,6 +26,9 @@ public class Constants
 	public final static int SELECT_DOCS_BY_DOCID = 23;
 	public final static int SELECT_USERS_BY_USERID = 24;
 	
+	public final static int MATCH_DOC = 25;
+	public final static int TEST_SELECT_USERDOC = 26;
+	
 	public final static int PLUG_NOT_INITIALIZED = 50;
 	public final static int PLUG_INITIALIZED = 51;
 	public final static int PLUG_TIMESTAMP_ERROR = 52;
@@ -36,7 +39,7 @@ public class Constants
 	static public final int FULL_ACCESS_ID = 0;
 	static public final int RESTRICTED_ACCESS_ID = 0;
 	
-	
+	public static final boolean EMUL = true;
 	
 	
 }

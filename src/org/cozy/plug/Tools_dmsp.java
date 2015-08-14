@@ -714,5 +714,38 @@ public class Tools_dmsp {
 			int res = Pstmt.executeUpdate();
 			return res;
 		}
+		public static int MATCH(String StringVal1, String StringVal2, 
+				java.sql.PreparedStatement Pstmt) throws Exception
+		{
+			Pstmt.setString(1, StringVal1);
+			Pstmt.setString(2, StringVal2);
+			int res = Pstmt.executeUpdate();
+			return res;
+		}
+		
+		
+		
+		public static java.sql.ResultSet Test_SELECT_BY_STRING_AND_STRING_AND_INT(
+				String StringVal1, String StringVal2, int IntVal, java.sql.PreparedStatement Pstmt)
+				throws Exception {
+		
+			Pstmt.setString(1, StringVal1);
+			Pstmt.setString(2, StringVal2);
+			Pstmt.setInt(3, IntVal);
+			java.sql.ResultSet rs = Pstmt.executeQuery();
+			return rs;
+		}
 
+		
+		public static java.sql.ResultSet Test_SELECT_BY_STRING_AND_STRING_AND_STRING_AND_STRING(
+				String StringVal1, String StringVal2, String StringVal3, String StringVal4, java.sql.PreparedStatement Pstmt)
+						throws Exception {
+				
+			Pstmt.setString(1, StringVal1);
+			Pstmt.setString(2, StringVal2);
+			Pstmt.setString(3, StringVal3);
+			Pstmt.setString(4, StringVal4);
+				java.sql.ResultSet rs = Pstmt.executeQuery();
+					return rs;
+				}
 }

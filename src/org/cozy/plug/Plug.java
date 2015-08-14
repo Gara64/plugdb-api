@@ -8,12 +8,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import test.jdbc.Tools;
-//import test.runnerTCP.ITest;
-import test.runner.ITest;
 
-//import org.inria.jdbc.DBMS;
+import test.runnerTCP.ITest;
+//import test.runner.ITest;
 
-//import test.jdbc.Tools;
+import org.inria.jdbc.DBMS;
+import test.jdbc.Tools;
 //import test.jdbc.schemaIndexInfo.Tools_schemaIndexInfo;
 
 
@@ -63,7 +63,7 @@ public class Plug extends Tools implements ITest
 				q.queryInsert(Constants.INSERT_DOC, docId, sharingRule, userParams[i]);
 		}
 		else
-			q.queryInsert(Constants.INSERT_DOC, docId, sharingRule, "");
+			q.queryInsert(Constants.INSERT_DOC, docId, sharingRule, "null"); //null (or any value) is needed; empty value are not compared
 		Save_DBMS_on_disk();
 	}
 	
@@ -75,7 +75,7 @@ public class Plug extends Tools implements ITest
 				q.queryInsert(Constants.INSERT_USER, userID, sharingRule, userParams[i]);
 		}
 		else
-			q.queryInsert(Constants.INSERT_USER, userID, sharingRule, "");
+			q.queryInsert(Constants.INSERT_USER, userID, sharingRule, "null"); //null (or any value) is needed; empty value are not compared
 		Save_DBMS_on_disk();
 	}
 	
@@ -214,7 +214,7 @@ public class Plug extends Tools implements ITest
 	{
 		String acl[][] = null;
 		
-		int ret = Match( matchingType, shareID, matchID );
+		int ret = ((DBMS) db).Match( matchingType, shareID, matchID );
 		if( ret <= 0)
 			return null;
 		else {
@@ -301,7 +301,8 @@ public class Plug extends Tools implements ITest
 		}
 		else if(plugState == Constants.PLUG_INITIALIZED)
 		{
-			mStorage.bypassInitialization();
+				((DBMS) db).bypassInitialization();
+				//mStorage.bypassInitialization();
 		}
 		else
 		{
@@ -311,20 +312,41 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(plugState, out, ps, db, perf);
 		
+		test();
 		//testMatch();
 
 	}
+	
 
 	public void test() throws Exception {
 		
-		plugInsertUser("test1", "1", null);
-		plugInsertUser("test2", "2", null);
-		plugInsertDoc("doc1", "1", null);
-		plugInsertDoc("doc2", "2", null);
+		plugInsertUser("user1", "share1", null);
+		plugInsertUser("user2", "share2", null);
+		for(int i=0;i<10;i++)
+			plugInsertDoc("doc"+i, "share1", null);
+		plugInsertDoc("doc2", "share2", null);
+		plugInsertShare("share1", "blah");
+		plugInsertShare("share2", "blah");
+		plugInsertShare("share3", "blah");
 		
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_USERS), out);
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS), out);
+		
+		// SELECT :
+		
+		//lireResultSet(q.querySelect(Constants.TEST_SELECT_USERDOC, "user1", "share1", "doc1","share1"), out);
+		lireResultSet( q.querySelect(Constants.MATCH_DOC, "user1", "share1"), out);
+		//System.out.println("n acl inserted : " + res);
+		//lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
 				
+		// INSERT AS SELECT :
+		
+		int res = q.queryInsert(Constants.MATCH_DOC, "user1", "share1");
+		System.out.println("n acl inserted : " + res);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
+
+		
+		
 		//int ret = Match("sharetest", "idtest");
 		//System.out.println("match ret : " + ret);
 		

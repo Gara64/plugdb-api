@@ -69,12 +69,15 @@ public class Plug extends Tools implements ITest
 	/* Insert in Users table  */ 
 	public void plugInsertUser(String userID, String sharingRule, String[] userParams) throws Exception
 	{
+		
 		if (userParams != null) {
 			for(int i=0; i<userParams.length; i++)
 				q.queryInsert(Constants.INSERT_USER, userID, sharingRule, userParams[i]);
 		}
-		else
+		else {
 			q.queryInsert(Constants.INSERT_USER, userID, sharingRule, "null"); //null (or any value) is needed; empty value are not compared
+			System.out.println("inserted " + userID + " - " + sharingRule);
+		}
 		Save_DBMS_on_disk();
 	}
 	
@@ -245,6 +248,8 @@ public class Plug extends Tools implements ITest
 		if ( res > 0 ) {
 			Save_DBMS_on_disk();
 			acl = plugSelectACL(shareID);
+			for(int i=0;i<acl.length;i++)
+				System.out.println("userid : " + acl[i][0] + " , docid : " + acl[i][1]);
 		}
 		
 		return acl;
@@ -365,7 +370,8 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(plugState, out, ps, db, perf);
 		
-		test();
+		//select_stars();
+		//test();
 		//testMatch();
 
 	}
@@ -474,5 +480,15 @@ public class Plug extends Tools implements ITest
 		
 		//Save_DBMS_on_disk();
 		//Shutdown_DBMS();
+	}
+	
+	public void select_stars() throws Exception {
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_USERS ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS ), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL ), out);
+		
+		Save_DBMS_on_disk();
+		Shutdown_DBMS();
 	}
 }

@@ -105,7 +105,7 @@ public class Queries extends Tools
 						rs = Tools_dmsp.Test_SELECT_BY_STRING_AND_STRING(p1, p2, ps);
 						break;
 				 case Constants.SELECT_ACL_BY_SHAREID:
-						query = "SELECT d.DocID, u.UserID FROM ACL a, Docs d, Users u, Shares s WHERE s.ShareID = ? AND s.IdGlobal = a.Share and a.User = u.IdGlobal AND a.Doc = d.IdGlobal";
+						query = "SELECT u.UserID, d.DocID FROM ACL a, Docs d, Users u, Shares s WHERE s.ShareID = ? AND s.IdGlobal = a.Share and a.User = u.IdGlobal AND a.Doc = d.IdGlobal";
 						ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_ACL_SELECT_BY_SHAREID);
 						rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
 						break;
@@ -140,16 +140,31 @@ public class Queries extends Tools
 					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_USERS_SELECT_BY_USERID);
 					 rs = Tools_dmsp.Test_SELECT_BY_STRING(p1, ps);
 					 break;
-					 
+					
 				 case Constants.MATCH_DOC:
 					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_MATCH_DOC);
 					 rs = Tools_dmsp.Test_SELECT_BY_STRING_AND_STRING(p1,p2, ps);
-					 //rs = ((org.inria.jdbc.Statement)stmt).executeQuery(COZY_QEP_IDs.EP_ACL.EP_MATCH_DOC);
 					 break;
 					 
-				 case Constants.TEST_SELECT_USERDOC:
-					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_TEST_SELECT_USERDOC);
-					 rs = Tools_dmsp.Test_SELECT_BY_STRING_AND_STRING_AND_STRING_AND_STRING(p1,p2,p3,p4, ps);
+				 case Constants.INSERT_SELECT_MATCH_DOCS:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_INSERT_SELECT_MATCH_DOCS);
+					 rs = Tools_dmsp.Test_SELECT_BY_STRING_AND_STRING(p1,p2, ps);
+					 //rs = ((org.inria.jdbc.Statement)stmt).executeQuery(COZY_QEP_IDs.EP_ACL.EP_MATCH_DOC);
+					 break;
+				 case Constants.INSERT_SELECT_MATCH_USERS:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_INSERT_SELECT_MATCH_USERS);
+					 rs = Tools_dmsp.Test_SELECT_BY_STRING_AND_STRING(p1,p2, ps);
+					 break; 
+				 
+					 
+				 case Constants.QUERY_TEST:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_TEST);
+					 rs = Tools_dmsp.Test_SELECT_BY_INT(Integer.parseInt(p1), ps);
+					 break;
+					 
+				 case Constants.SELECT_STAR_SKT_ACL:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_SELECT_STAR_SKT_ACL);
+					 rs = Tools_dmsp.Test_SELECT(ps);
 					 break;
 					 
 			}
@@ -198,8 +213,12 @@ public class Queries extends Tools
 					res = Tools_dmsp.INSERT_SHARE(p1, p2, ps);
 					break;
 					
-				 case Constants.MATCH_DOC:
-					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_MATCH_DOC_INSERT);
+				 case Constants.INSERT_MATCH_DOCS:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_INSERT_MATCH_DOCS);
+					 res = Tools_dmsp.MATCH(p1, p2, ps);
+					 break;
+				 case Constants.INSERT_MATCH_USERS:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_INSERT_MATCH_USERS);
 					 res = Tools_dmsp.MATCH(p1, p2, ps);
 					 break;
 					 

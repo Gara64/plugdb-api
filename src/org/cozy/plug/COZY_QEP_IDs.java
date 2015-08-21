@@ -31,8 +31,13 @@ public class COZY_QEP_IDs {
 		public static final int EP_DOCS_SELECT_BY_DOCID = cpt++;
 		public static final int EP_USERS_SELECT_BY_USERID = cpt++;
 		public static final int EP_MATCH_DOC = cpt++;
-		public final static int EP_TEST_SELECT_USERDOC = cpt++;
-		public final static int EP_MATCH_DOC_INSERT = cpt;
+		public final static int EP_TEST = cpt++;
+		public final static int EP_INSERT_MATCH_DOCS = cpt++;
+		public final static int EP_INSERT_MATCH_USERS = cpt++;
+		public final static int EP_INSERT_SELECT_MATCH_DOCS = cpt++;
+		public final static int EP_INSERT_SELECT_MATCH_USERS = cpt++;
+		public final static int EP_SELECT_STAR_SKT_ACL = cpt++;
+		
 	}
 
 }

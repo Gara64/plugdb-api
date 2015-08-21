@@ -4,15 +4,14 @@ package org.cozy.plug;
 import java.io.PrintWriter;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import test.jdbc.Tools;
 
-import test.runnerTCP.ITest;
-//import test.runner.ITest;
+//import test.runnerTCP.ITest;
+import test.runner.ITest;
 
-import org.inria.jdbc.DBMS;
+//import org.inria.jdbc.DBMS;
 import test.jdbc.Tools;
 //import test.jdbc.schemaIndexInfo.Tools_schemaIndexInfo;
 
@@ -192,6 +191,7 @@ public class Plug extends Tools implements ITest
 
 		try 
 		{
+			//select userid, docid drom acl, doc, user
 			rs = q.querySelect(Constants.SELECT_ACL_BY_SHAREID, shareID); 
 			tuples = Util.getTuples(rs);
 			
@@ -210,19 +210,72 @@ public class Plug extends Tools implements ITest
 		return acl;
 	}
 	
-	public String[][] plugMatch(int matchingType, String shareID, String matchID) throws Exception
+	/* Match a table for a specified doc/user id + shareid.
+	 * Returns all the [userids, docids] for this share in acl.
+	 * Note that a version that calls INSERT_SELECT_MATCH_... should be implemented
+	 * to returns only the inserted [userids, docids].
+	 */
+	public String[][] plugMatchAll(int matchingType, String id, String shareID) throws Exception
 	{
 		String acl[][] = null;
+		int res = 0;
 		
-		int ret = ((DBMS) db).Match( matchingType, shareID, matchID );
+		/* Version lost with computer...
+		 * int ret = ((DBMS) db).Match( matchingType, shareID, matchID );
 		if( ret <= 0)
 			return null;
 		else {
 			Save_DBMS_on_disk();
 			acl = plugSelectACL(shareID);
 			return acl;
-		}
+		}*/
+		
+		if(matchingType == Constants.MATCH_USERS) 
+			res = q.queryInsert(Constants.INSERT_MATCH_USERS, id, shareID);
 			
+		else if(matchingType == Constants.MATCH_DOCS)
+			res = q.queryInsert(Constants.INSERT_MATCH_DOCS, id, shareID);
+
+		else
+			return null;
+		
+		System.out.println("inserted " + res + " acl" );
+		
+		// If the match has inserted acl, select all the userid, docid for this share and commit
+		if ( res > 0 ) {
+			Save_DBMS_on_disk();
+			acl = plugSelectACL(shareID);
+		}
+		
+		return acl;
+	}
+	
+	/* Match a table for a specified doc/user id + shareid
+	 * Returns only the inserted [userids, docids] in ACL
+	 * Returns null if nothing has been inserted
+	 */
+	public String[][] plugMatch(int matchingType, String id, String shareID) throws Exception
+	{
+		String acl[][] = null;
+		ResultSet rs;
+		
+		if(matchingType == Constants.MATCH_USERS) 
+			rs = q.querySelect(Constants.INSERT_SELECT_MATCH_USERS, id, shareID);
+			
+		else if(matchingType == Constants.MATCH_DOCS)
+			rs = q.querySelect(Constants.INSERT_SELECT_MATCH_DOCS, id, shareID);
+		else
+			return null;
+		
+		ArrayList<ArrayList<String>> tuples = Util.getTuples(rs);
+		
+		// If the match has inserted acl, select the inserted userid, docid and commit
+		if (tuples.size() > 0 ) {
+			Save_DBMS_on_disk();
+			acl = Util.convertDoubleArrayListIntoString(tuples);
+		}
+		
+		return acl;
 	}
 	
 	public void plugClose()
@@ -301,8 +354,8 @@ public class Plug extends Tools implements ITest
 		}
 		else if(plugState == Constants.PLUG_INITIALIZED)
 		{
-				((DBMS) db).bypassInitialization();
-				//mStorage.bypassInitialization();
+				//((DBMS) db).bypassInitialization();
+				mStorage.bypassInitialization();
 		}
 		else
 		{
@@ -319,38 +372,51 @@ public class Plug extends Tools implements ITest
 	
 
 	public void test() throws Exception {
-		
+
 		plugInsertUser("user1", "share1", null);
 		plugInsertUser("user2", "share2", null);
 		for(int i=0;i<10;i++)
 			plugInsertDoc("doc"+i, "share1", null);
 		plugInsertDoc("doc2", "share2", null);
+		
 		plugInsertShare("share1", "blah");
 		plugInsertShare("share2", "blah");
-		plugInsertShare("share3", "blah");
+
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES), out);
+		//q.queryInsert(Constants.INSERT_ACL, "15", "2", "5", "bl", "bloh");
+		//lireResultSet(q.querySelect(Constants.SELECT_ACL_BY_SHAREID, "share1"), out);
+		//lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
 		
-		lireResultSet(q.querySelect(Constants.SELECT_STAR_USERS), out);
+		/*lireResultSet(q.querySelect(Constants.SELECT_STAR_USERS), out);
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS), out);
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES), out);
+		*/
+		
+		
+		//q.queryInsert(Constants.INSERT_ACL, "15", "2", "5", "bl", "bloh");
+		//lireResultSet(q.querySelect(Constants.SELECT_STAR_SKT_ACL), out);
+		
+		/*String[][] acl = plugMatch(Constants.MATCH_USERS, "doc1", "share1");
+		for(int i=0;i<acl.length;i++)
+		{
+			System.out.println("userid : " + acl[i][0] + " , docid : " + acl[i][1]);
+		}*/
+	
+		
 		
 		// SELECT :
-		
-		//lireResultSet(q.querySelect(Constants.TEST_SELECT_USERDOC, "user1", "share1", "doc1","share1"), out);
-		lireResultSet( q.querySelect(Constants.MATCH_DOC, "user1", "share1"), out);
-		//System.out.println("n acl inserted : " + res);
-		//lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
+		//lireResultSet( q.querySelect(Constants.MATCH_DOC, "user1", "share1"), out);
 				
 		// INSERT AS SELECT :
-		
-		int res = q.queryInsert(Constants.MATCH_DOC, "user1", "share1");
-		System.out.println("n acl inserted : " + res);
-		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
-
-		
+		lireResultSet( q.querySelect(Constants.INSERT_SELECT_MATCH_DOCS, "user1", "share1"), out);
+		//lireResultSet( q.querySelect(Constants.INSERT_SELECT_MATCH_USERS, "doc1", "share1"), out);
+	//	System.out.println("n acl inserted : " + res);
+	 
 		
 		//int ret = Match("sharetest", "idtest");
 		//System.out.println("match ret : " + ret);
 		
-		Save_DBMS_on_disk();
+		//Save_DBMS_on_disk();
 		Shutdown_DBMS();
 	}
 	

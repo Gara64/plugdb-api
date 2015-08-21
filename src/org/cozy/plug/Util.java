@@ -34,6 +34,8 @@ public class Util
 		}
 		return tuples;
 	}
+	
+
 
 	public static ArrayList<String> getTuplesWithSingleAttribute(ResultSet rs) throws SQLException
 	{
@@ -81,6 +83,19 @@ public class Util
 	public static String[] convertArrayListIntoString(ArrayList<String> list)
 	{
 		return list.toArray(new String[list.size()]);
+	}
+	
+	public static String[][] convertDoubleArrayListIntoString(ArrayList<ArrayList<String>> list) 
+	{
+		String[][] strArr = new String[list.size()][];
+		
+		for(int i=0;i<list.size();i++)
+		{
+			String str[] = convertArrayListIntoString(list.get(i));
+			strArr[i] = str;
+		}
+		
+		return strArr;
 	}
 
 }

@@ -12,6 +12,7 @@ public class Constants
 	public final static int SELECT_STAR_USERS = 13;
 	public final static int SELECT_STAR_DOCS = 14;
 	public final static int SELECT_STAR_SHARES = 15;
+	public final static int SELECT_STAR_SKT_ACL = 31;
 	
 	public final static int SELECT_DOCID_BY_SHARINGRULE = 16;
 	public final static int SELECT_USERID_BY_SHARINGRULE = 17;
@@ -27,7 +28,13 @@ public class Constants
 	public final static int SELECT_USERS_BY_USERID = 24;
 	
 	public final static int MATCH_DOC = 25;
-	public final static int TEST_SELECT_USERDOC = 26;
+	public final static int INSERT_MATCH_DOCS = 27;
+	public final static int INSERT_MATCH_USERS = 28;
+	public final static int INSERT_SELECT_MATCH_DOCS = 29;
+	public final static int INSERT_SELECT_MATCH_USERS = 30;
+	public final static int QUERY_TEST = 26;
+	
+	
 	
 	public final static int PLUG_NOT_INITIALIZED = 50;
 	public final static int PLUG_INITIALIZED = 51;

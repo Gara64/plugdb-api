@@ -113,6 +113,28 @@ public class EP_ACL {
 		"/*EP \u0001 0 2 2 0 # 1 1 1 2 r0 4 0 1 0 1 2 3 # 4 0 0 1 1 0 ?1 r2 # \u0000 4 1 1 IdGlobal 0 2 UserID 0 3 SharingRule 0 4 UserParam # \u0000*/";
 	
 	
+	public static String EP_DELETE_DOC =
+			"/*EP \u0001 " + 
+		"2 2 2 -1 1 ?1 # " + /* CI_LOOKUP ref_tab:Docs(1) key_col_id:4 ka_id:1	 key:?1(R0) -->R1 */
+		"5 1 1 2 3 4 1 17 v11 18 r1 19 v10 # " + /* TABLE_INSERT 3 cols, table LogDeleted(4), is_table: 1, [col_id value] -->R2 - R3*/
+		"9 0 0 1 1 r1 # " + /* TABLE DELETE, table Docs(1), tuple pos: R1 */
+		"\u0000*/";
+
+	public static String EP_DELETE_USER =
+		"/*EP \u0001 " + 
+	"2 2 2 -1 0 ?1 # " + /* CI_LOOKUP ref_tab:Users(0) key_col_id:0 ka_id:0	 key:?1(R0) -->R1 */
+	"5 1 1 2 3 4 1 17 v10 18 r1 19 v10 # " + /* TABLE_INSERT 3 cols, table LogDeleted(4), is_table: 1, [col_id value] -->R2 - R3*/
+	"9 0 0 1 0 r1 # " + /* TABLE DELETE, table Users(0), tuple pos: R1 */
+	"\u0000*/";
+	
+	public static String EP_DELETE_SHARE =
+			"/*EP \u0001 " + 
+		"2 2 2 -1 2 ?1 # " + /* CI_LOOKUP ref_tab:Shares(2) key_col_id:8 ka_id:2	 key:?1(R0) -->R1 */
+		"5 1 1 2 3 4 1 17 v12 18 r1 19 v10 # " + /* TABLE_INSERT 3 cols, table LogDeleted(4), is_table: 1, [col_id value] -->R2 - R3*/
+		"9 0 0 1 2 r1 # " + /* TABLE DELETE, table Shares(2), tuple pos: R1 */
+		"\u0000*/";
+	
+	
 	//test ep
 	public static String EP_TEST =
 			"/*EP \u0001 " + 
@@ -251,6 +273,31 @@ public class EP_ACL {
 		"5 14 14 13 3 0 0 0 r0 1 r1 2 r2 # " + // TABLE_INSERT 3 cols, skt ACL(0), is_table: 0, [col_id value]  
 		"5 0 0 14 6 3 1 12 r13 13 r9 14 r3 15 v0'rw' 16 v0'auth'11 v30 # " + // TABLE_INSERT 6 cols, table ACL(3), is_table: 1, [col_id value] 
 		"\u0000*/";
+	
+	public static String EP_DELETE_MATCH_DOCS = 
+			"/*EP \u0002 " +
+			"0 7 7 0 # " + //SCAN USER --> r0
+			"0 6 6 1 # " + //SCAN DOC --> r1
+			"0 10 10 2 # " + //SCAN SHARE -> r2
+			"1 4 4 7 r0 4 0 1 0 3 1 2 # " + // T_LOOKUP USER --> r3-r6 (IdGlobal, UserParam, UserID, SharingRule)
+			"4 3 3 4 1 0 ?1 r5 # " + //SELECT USER UID --> r7
+			"4 2 2 3 2 0 ?2 r6 # " + //SELECT USER SHAREID --> r8
+			"7 5 5 2 6 # " +	//FLOW_X  --> X
+			"1 1 1 5 r1 3 1 1 4 7 6 # " +  // T_LOOKUP DOC--> r9-r11 (IdGlobal, UserParam, SharingRule)
+			"4 8 8 1 6 0 ?2 r11 # " + //SELECT DOC SHAREID --> r12
+			"4 9 9 8 3 0 r10 r4 # " + //SELECT U PARAMS --> X (no '?', therefore no register produced)
+			
+			"7 11 11 9 10 # " +	//FLOW_X  --> X
+			"1 12 12 11 r2 2 2 1 8 9 # " + // T_LOOKUP SHARE --> r13-r14
+			"4 13 13 12 9 0 ?2 r14 # " + // SELECT IDGLOBAL SHARE --> r15
+			
+			"5 14 14 13 3 4 1 17 v13 18 r0 2 r2 # " + // TABLE_INSERT 3 cols, skt ACL(0), is_table: 0, [col_id value]  
+			"9 0 0 14 3 r1" + // TABLE DELETE, table ACL(3), tuple pos: R1
+	 		"\u0000*/";
+	
+
+	
+	
 	
 	public static String EP_SELECT_STAR_SKT_ACL = 
 		"/*EP \u0000 " +

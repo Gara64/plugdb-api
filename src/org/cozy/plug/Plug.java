@@ -81,7 +81,6 @@ public class Plug extends Tools implements ITest
 		}
 		else {
 			q.queryInsert(Constants.INSERT_USER, userID, sharingRule, "null"); //null (or any value) is needed; empty value are not compared
-			System.out.println("inserted " + userID + " - " + sharingRule);
 		}
 		Save_DBMS_on_disk();
 	}
@@ -89,10 +88,8 @@ public class Plug extends Tools implements ITest
 	/* Insert in Shares table  */ 
 	public void plugInsertShare(String shareID, String desc) throws Exception
 	{
-		System.out.println("let's insert share " + shareID);
 		q.queryInsert(Constants.INSERT_SHARE, shareID, desc);
 		Save_DBMS_on_disk();
-		System.out.println("insert ok " + shareID);
 	}
 	
 	
@@ -219,6 +216,39 @@ public class Plug extends Tools implements ITest
 		
 		return acl;
 	}
+	
+	
+	/* Delete in Doc table  */ 
+	public void plugDeleteDoc(int IdGlobal) throws Exception
+	{
+		int res = q.queryInsert(Constants.DELETE_DOC, String.valueOf(IdGlobal));
+		if(res > 1)
+			System.out.println("Delete " + IdGlobal + " from Doc ok");
+		else
+			System.out.println("Nothig has been deleted");
+		Save_DBMS_on_disk();
+	}
+	/* Delete in User table  */ 
+	public void plugDeleteUser(int IdGlobal) throws Exception
+	{
+		int res = q.queryInsert(Constants.DELETE_USER, String.valueOf(IdGlobal));
+		if(res > 1)
+			System.out.println("Delete " + IdGlobal + " from User ok");
+		else
+			System.out.println("Nothig has been deleted");
+		Save_DBMS_on_disk();
+	}
+	/* Delete in Share table  */ 
+	public void plugDeleteShare(int IdGlobal) throws Exception
+	{
+		int res = q.queryInsert(Constants.DELETE_SHARE, String.valueOf(IdGlobal));
+		if(res > 1)
+			System.out.println("Delete " + IdGlobal + " from Share ok");
+		else
+			System.out.println("Nothig has been deleted");
+		Save_DBMS_on_disk();
+	}
+	
 	
 	/* Match a table for a specified doc/user id + shareid.
 	 * Returns all the [userids, docids] for this share in acl.
@@ -376,7 +406,7 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(Globals.BOOT_STATUS, out, ps, db, perf);
 		
-		//test();
+		test();
 		select_stars();
 		
 		//testMatch();
@@ -386,16 +416,21 @@ public class Plug extends Tools implements ITest
 
 	public void test() throws Exception {
 
-		/*plugInsertUser("user1", "share1", null);
+		plugInsertUser("user1", "share1", null);
 		plugInsertUser("user2", "share2", null);
 		for(int i=0;i<10;i++)
 			plugInsertDoc("doc"+i, "share1", null);
 		plugInsertDoc("doc2", "share2", null);
 		
 		plugInsertShare("share1", "blah");
-		plugInsertShare("share2", "blah");*/
+		plugInsertShare("share2", "blah");
 		
-		plugInsertUser("user5", "share1", null);
+		
+		
+		
+		plugDeleteDoc(14);
+		plugDeleteUser(3);
+		plugDeleteShare(16);
 
 		//lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES), out);
 		//q.queryInsert(Constants.INSERT_ACL, "15", "2", "5", "bl", "bloh");
@@ -420,11 +455,11 @@ public class Plug extends Tools implements ITest
 		
 		
 		// SELECT :
-		String[][] acl = plugMatchAll(Constants.MATCH_DOCS, "user5", "share1");
+		/*String[][] acl = plugMatchAll(Constants.MATCH_DOCS, "user5", "share1");
 		for(int i=0;i<acl.length;i++)
 		{
 			System.out.println("userid : " + acl[i][0] + " , docid : " + acl[i][1]);
-		}
+		}*/
 				
 		// INSERT AS SELECT :
 		//lireResultSet( q.querySelect(Constants.INSERT_SELECT_MATCH_DOCS, "user1", "share1"), out);
@@ -435,7 +470,7 @@ public class Plug extends Tools implements ITest
 		//int ret = Match("sharetest", "idtest");
 		//System.out.println("match ret : " + ret);
 		
-		Save_DBMS_on_disk();
+		//Save_DBMS_on_disk();
 		//Shutdown_DBMS();
 	}
 	

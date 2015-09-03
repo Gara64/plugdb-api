@@ -38,6 +38,9 @@ public class COZY_QEP_IDs {
 		public final static int EP_INSERT_SELECT_MATCH_USERS = cpt++;
 		public final static int EP_SELECT_STAR_SKT_ACL = cpt++;
 		
+		public final static int EP_DELETE_DOC = cpt++;
+		public final static int EP_DELETE_USER = cpt++;
+		public final static int EP_DELETE_SHARE = cpt++;
 	}
 
 }

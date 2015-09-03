@@ -222,6 +222,19 @@ public class Queries extends Tools
 					 res = Tools_dmsp.MATCH(p1, p2, ps);
 					 break;
 					 
+				 case Constants.DELETE_DOC:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_DELETE_DOC);
+					 res = Tools_dmsp.DELETE_BY_ID(Integer.parseInt(p1), ps);
+					 break;
+				 case Constants.DELETE_USER:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_DELETE_USER);
+					 res = Tools_dmsp.DELETE_BY_ID(Integer.parseInt(p1), ps);
+					 break;
+				 case Constants.DELETE_SHARE:
+					 ps = ((org.inria.jdbc.Connection)dbase).prepareStatement(COZY_QEP_IDs.EP_ACL.EP_DELETE_SHARE);
+					 res = Tools_dmsp.DELETE_BY_ID(Integer.parseInt(p1), ps);
+					 break;
+					 
 				default:
 					break;
 			}

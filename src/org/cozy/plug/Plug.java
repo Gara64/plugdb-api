@@ -122,8 +122,8 @@ public class Plug extends Tools implements ITest
 		return docIds;
 	}
 	
-	/* Select 1 Doc */
-	public String[] plugSelectSingleDoc(String docID)
+	/* Select star on Doc where DocID = ? */
+	public String[][] plugSelectDocsByDocID(String docID)
 	{
 		ResultSet rs;
 		ArrayList<ArrayList<String>> tuples = new ArrayList<ArrayList<String>>();
@@ -140,11 +140,12 @@ public class Plug extends Tools implements ITest
 		
 		if(tuples == null || tuples.isEmpty())
 			return null;
-		return Util.convertArrayListIntoString(tuples.get(0));
+		
+		return Util.convertDoubleArrayListIntoString(tuples);
 	}
 	
-	/* Select 1 User */
-	public String[] plugSelectSingleUser(String userID)
+	/* Select star on User where UserID = ? */
+	public String[][] plugSelectUsersByUserID(String userID)
 	{
 		ResultSet rs;
 		ArrayList<ArrayList<String>> tuples = new ArrayList<ArrayList<String>>();
@@ -153,7 +154,6 @@ public class Plug extends Tools implements ITest
 			//For the moment, just select star on the docs to get the id
 			rs = q.querySelect(Constants.SELECT_USERS_BY_USERID, userID);
 			tuples = Util.getTuples(rs);
-			System.out.println("size : " + tuples.size());
 			
 		
 		} catch (Exception e) {
@@ -163,7 +163,7 @@ public class Plug extends Tools implements ITest
 		
 		if(tuples == null || tuples.isEmpty())
 			return null;
-		return Util.convertArrayListIntoString(tuples.get(0));
+		return Util.convertDoubleArrayListIntoString(tuples);
 	}
 	
 	/* Select all the users */
@@ -355,15 +355,15 @@ public class Plug extends Tools implements ITest
 		init();
 		openConnection(dbmsHost, null);
 		
-		int plugState = Util.checksPlugState((org.inria.jdbc.Connection)db);
-		Globals.BOOT_STATUS = plugState;
-		System.out.println("plug state : " + plugState);
+
+		Globals.BOOT_STATUS = Util.checksPlugState((org.inria.jdbc.Connection)db);
+		System.out.println("plug state : " + Globals.BOOT_STATUS);
 		
-		if(plugState == Constants.PLUG_NOT_INITIALIZED) {
+		if(Globals.BOOT_STATUS == Constants.PLUG_NOT_INITIALIZED){
 			plugReset(); //also desinstalls metadata, in case the state is not reliable
 			Util.makesPlugStateInit((org.inria.jdbc.Connection)db);
 		}
-		else if(plugState == Constants.PLUG_INITIALIZED)
+		else if(Globals.BOOT_STATUS == Constants.PLUG_INITIALIZED)
 		{
 				//((DBMS) db).bypassInitialization();
 				mStorage.bypassInitialization();
@@ -374,7 +374,7 @@ public class Plug extends Tools implements ITest
 			System.exit(1);
 		}
 		
-		q = new Queries(plugState, out, ps, db, perf);
+		q = new Queries(Globals.BOOT_STATUS, out, ps, db, perf);
 		
 		//test();
 		select_stars();

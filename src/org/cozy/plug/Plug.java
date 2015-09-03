@@ -31,9 +31,14 @@ public class Plug extends Tools implements ITest
 		
 	}
 	
-	public void plugInit(String dbmsHost) throws Exception
+	/* Init the token and return the boot status : 
+	 * 50 : first init
+	 * 51 : already init
+	 */
+	public int plugInit(String dbmsHost) throws Exception
 	{	
 		run(output, dbmsHost);
+		return Globals.BOOT_STATUS;
 	}
 	
 	/* Insert doc ids and sharing rules */ 
@@ -84,8 +89,10 @@ public class Plug extends Tools implements ITest
 	/* Insert in Shares table  */ 
 	public void plugInsertShare(String shareID, String desc) throws Exception
 	{
+		System.out.println("let's insert share " + shareID);
 		q.queryInsert(Constants.INSERT_SHARE, shareID, desc);
 		Save_DBMS_on_disk();
+		System.out.println("insert ok " + shareID);
 	}
 	
 	
@@ -248,8 +255,6 @@ public class Plug extends Tools implements ITest
 		if ( res > 0 ) {
 			Save_DBMS_on_disk();
 			acl = plugSelectACL(shareID);
-			for(int i=0;i<acl.length;i++)
-				System.out.println("userid : " + acl[i][0] + " , docid : " + acl[i][1]);
 		}
 		
 		return acl;
@@ -351,9 +356,10 @@ public class Plug extends Tools implements ITest
 		openConnection(dbmsHost, null);
 		
 		int plugState = Util.checksPlugState((org.inria.jdbc.Connection)db);
+		Globals.BOOT_STATUS = plugState;
 		System.out.println("plug state : " + plugState);
 		
-		if(plugState == Constants.PLUG_NOT_INITIALIZED){
+		if(plugState == Constants.PLUG_NOT_INITIALIZED) {
 			plugReset(); //also desinstalls metadata, in case the state is not reliable
 			Util.makesPlugStateInit((org.inria.jdbc.Connection)db);
 		}
@@ -370,8 +376,9 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(plugState, out, ps, db, perf);
 		
-		//select_stars();
 		//test();
+		select_stars();
+		
 		//testMatch();
 
 	}
@@ -379,16 +386,18 @@ public class Plug extends Tools implements ITest
 
 	public void test() throws Exception {
 
-		plugInsertUser("user1", "share1", null);
+		/*plugInsertUser("user1", "share1", null);
 		plugInsertUser("user2", "share2", null);
 		for(int i=0;i<10;i++)
 			plugInsertDoc("doc"+i, "share1", null);
 		plugInsertDoc("doc2", "share2", null);
 		
 		plugInsertShare("share1", "blah");
-		plugInsertShare("share2", "blah");
+		plugInsertShare("share2", "blah");*/
+		
+		plugInsertUser("user5", "share1", null);
 
-		lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES), out);
+		//lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES), out);
 		//q.queryInsert(Constants.INSERT_ACL, "15", "2", "5", "bl", "bloh");
 		//lireResultSet(q.querySelect(Constants.SELECT_ACL_BY_SHAREID, "share1"), out);
 		//lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
@@ -411,10 +420,14 @@ public class Plug extends Tools implements ITest
 		
 		
 		// SELECT :
-		//lireResultSet( q.querySelect(Constants.MATCH_DOC, "user1", "share1"), out);
+		String[][] acl = plugMatchAll(Constants.MATCH_DOCS, "user5", "share1");
+		for(int i=0;i<acl.length;i++)
+		{
+			System.out.println("userid : " + acl[i][0] + " , docid : " + acl[i][1]);
+		}
 				
 		// INSERT AS SELECT :
-		lireResultSet( q.querySelect(Constants.INSERT_SELECT_MATCH_DOCS, "user1", "share1"), out);
+		//lireResultSet( q.querySelect(Constants.INSERT_SELECT_MATCH_DOCS, "user1", "share1"), out);
 		//lireResultSet( q.querySelect(Constants.INSERT_SELECT_MATCH_USERS, "doc1", "share1"), out);
 	//	System.out.println("n acl inserted : " + res);
 	 
@@ -422,8 +435,8 @@ public class Plug extends Tools implements ITest
 		//int ret = Match("sharetest", "idtest");
 		//System.out.println("match ret : " + ret);
 		
-		//Save_DBMS_on_disk();
-		Shutdown_DBMS();
+		Save_DBMS_on_disk();
+		//Shutdown_DBMS();
 	}
 	
 	public void testMatch() throws Exception {
@@ -488,7 +501,7 @@ public class Plug extends Tools implements ITest
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS ), out);
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL ), out);
 		
-		Save_DBMS_on_disk();
+		//Save_DBMS_on_disk();
 		Shutdown_DBMS();
 	}
 }

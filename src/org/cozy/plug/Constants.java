@@ -38,6 +38,9 @@ public class Constants
 	public final static int DELETE_USER = 32;
 	public final static int DELETE_SHARE = 33;
 	
+	public final static int  DELETE_MATCH_DOCS = 34;
+	public final static int  DELETE_MATCH_USERS = 35;
+	
 	public final static int PLUG_NOT_INITIALIZED = 50;
 	public final static int PLUG_INITIALIZED = 51;
 	public final static int PLUG_TIMESTAMP_ERROR = 52;

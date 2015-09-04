@@ -733,6 +733,15 @@ public class Tools_dmsp {
 		}
 
 		
+		public static int DELETE_BY_ID_AND_STRING(int IntVal1, String StringVal2, 
+				java.sql.PreparedStatement Pstmt) throws Exception
+		{
+			Pstmt.setInt(1, IntVal1);
+			Pstmt.setString(2, StringVal2);
+			int res = Pstmt.executeUpdate();
+			return res;
+		}
+		
 		
 		
 		public static java.sql.ResultSet Test_SELECT_BY_STRING_AND_STRING_AND_INT(

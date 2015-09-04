@@ -318,6 +318,31 @@ public class Plug extends Tools implements ITest
 		return acl;
 	}
 	
+	public String[][] plugDeleteMatch(int matchingType, int idGlobal, String shareID) throws Exception
+	{
+		System.out.println("delete match for " + idGlobal );
+		String acl[][] = null;
+		int res = 0;
+		
+		if(matchingType == Constants.MATCH_USERS) 
+			res = q.queryInsert(Constants.DELETE_MATCH_USERS, String.valueOf(idGlobal), shareID);
+			
+		else if(matchingType == Constants.MATCH_DOCS)
+			res = q.queryInsert(Constants.DELETE_MATCH_DOCS, String.valueOf(idGlobal), shareID);
+		else
+			return null;
+		
+		System.out.println("deleted " + res + " acl" );
+		
+		// If the match has deleted acl, select all the userid, docid for this share and commit
+		if ( res > 0 ) {
+			Save_DBMS_on_disk();
+			acl = plugSelectACL(shareID);
+		}
+		
+		return acl;
+	}
+	
 	public void plugClose()
 	{
 	    try 
@@ -406,8 +431,8 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(Globals.BOOT_STATUS, out, ps, db, perf);
 		
-		test();
-		select_stars();
+		//test();
+		//select_stars();
 		
 		//testMatch();
 
@@ -426,11 +451,12 @@ public class Plug extends Tools implements ITest
 		plugInsertShare("share2", "blah");
 		
 		
-		
-		
-		plugDeleteDoc(14);
-		plugDeleteUser(3);
-		plugDeleteShare(16);
+		plugMatchAll(Constants.MATCH_DOCS, "user1", "share1");
+		plugMatchAll(Constants.MATCH_DOCS, "user2", "share2");
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
+		plugDeleteMatch(Constants.MATCH_DOCS, 2, "share1");
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
+	
 
 		//lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES), out);
 		//q.queryInsert(Constants.INSERT_ACL, "15", "2", "5", "bl", "bloh");

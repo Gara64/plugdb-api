@@ -37,21 +37,37 @@ public class Plug extends Tools implements ITest
 		return Globals.BOOT_STATUS;
 	}
 	
-	/* Insert doc ids and sharing rules */ 
-	public void plugInsertDocs(String[] docIds)
+	/* Insert docs ids */ 
+	public void plugInsertDocs(String[] docIds, String sharingRule, String[] userParams) throws Exception
 	{
-		try 
+		for(int i=0;i<docIds.length;i++)
 		{
-			// Insert the generated docs ids in plugdb 
-			for(int i=0; i<docIds.length; i++)
-				q.queryInsert(Constants.INSERT_DOC, docIds[i], "", "");
-			
-			Save_DBMS_on_disk();
-		
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (userParams != null) {
+				for(int j=0; i<userParams.length; j++)
+					q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, userParams[j]);
+			}
+			else
+				q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, "null"); //null (or any value) is needed; empty value are not compared
 		}
+		Save_DBMS_on_disk();
+		
+	}
+	
+	/* Insert users ids */ 
+	public void plugInsertUsers(String[] userIds, String sharingRule, String[] userParams) throws Exception
+	{
+		
+		for(int i=0;i<userIds.length;i++)
+		{
+			if (userParams != null) {
+				for(int j=0; i<userParams.length; j++)
+					q.queryInsert(Constants.INSERT_USER, userIds[i], sharingRule, userParams[j]);
+			}
+			else
+				q.queryInsert(Constants.INSERT_USER, userIds[i], sharingRule, "null"); //null (or any value) is needed; empty value are not compared
+		}
+		Save_DBMS_on_disk();
+		
 	}
 	
 	/* Insert in Docs table  */ 
@@ -223,6 +239,8 @@ public class Plug extends Tools implements ITest
 	{
 		String acl[][] = null;
 		int res = 0;
+		
+	//	System.out.println("match " + matchingType + " on id " + id + " for share id " + shareID);
 		
 		/* Version lost with computer...
 		 * int ret = ((DBMS) db).Match( matchingType, shareID, matchID );

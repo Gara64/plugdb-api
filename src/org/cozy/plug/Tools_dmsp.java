@@ -677,6 +677,7 @@ public class Tools_dmsp {
 		}
 		
 		//--------------- PlugTest -----------------
+		
 		public static int INSERT_ACL(int IntVal1, int IntVal2, int IntVal3, String StringVal1, String StringVal2, 
 				java.sql.PreparedStatement Pstmt) throws Exception
 		{
@@ -718,6 +719,24 @@ public class Tools_dmsp {
 				java.sql.PreparedStatement Pstmt) throws Exception
 		{
 			Pstmt.setString(1, StringVal1);
+			Pstmt.setString(2, StringVal2);
+			int res = Pstmt.executeUpdate();
+			return res;
+		}
+		
+		public static int DELETE_BY_ID(int IntVal1, 
+				java.sql.PreparedStatement Pstmt) throws Exception
+		{
+			Pstmt.setInt(1, IntVal1);
+			int res = Pstmt.executeUpdate();
+			return res;
+		}
+
+		
+		public static int DELETE_BY_ID_AND_STRING(int IntVal1, String StringVal2, 
+				java.sql.PreparedStatement Pstmt) throws Exception
+		{
+			Pstmt.setInt(1, IntVal1);
 			Pstmt.setString(2, StringVal2);
 			int res = Pstmt.executeUpdate();
 			return res;

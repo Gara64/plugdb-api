@@ -67,7 +67,7 @@ public class EP_ACL {
 	"\u0000 2 1 1 IdGlobal 0 2 UserParam # " + /* META_RESULT, 2 cols, type(0-char 1-num 2-date) [out_result name] */
 	"\u0000*/";
 
-	/* QEP for ACL comme les autres'selection */
+	/* QEP for ACL selection */
 	public static String EP_ACL_SELECT_BY_SHAREID =
 		"/*EP \u0001 " + 
 	"0 5 5 3 # " + /* SCAN, Table ACL (3) -->R0 */
@@ -113,16 +113,45 @@ public class EP_ACL {
 		"/*EP \u0001 0 2 2 0 # 1 1 1 2 r0 4 0 1 0 1 2 3 # 4 0 0 1 1 0 ?1 r2 # \u0000 4 1 1 IdGlobal 0 2 UserID 0 3 SharingRule 0 4 UserParam # \u0000*/";
 	
 	
+	public static String EP_DELETE_DOC =
+			"/*EP \u0001 " + 
+		"2 2 2 -1 1 ?1 # " + /* CI_LOOKUP ref_tab:Docs(1) key_col_id:4 ka_id:1	 key:?1(R0) -->R1 */
+		"5 1 1 2 3 4 1 17 v11 18 r1 19 v10 # " + /* TABLE_INSERT 3 cols, table LogDeleted(4), is_table: 1, [col_id value] -->R2 - R3*/
+		"9 0 0 1 1 r1 # " + /* TABLE DELETE, table Docs(1), tuple pos: R1 */
+		"\u0000*/";
+
+	public static String EP_DELETE_USER =
+		"/*EP \u0001 " + 
+	"2 2 2 -1 0 ?1 # " + /* CI_LOOKUP ref_tab:Users(0) key_col_id:0 ka_id:0	 key:?1(R0) -->R1 */
+	"5 1 1 2 3 4 1 17 v10 18 r1 19 v10 # " + /* TABLE_INSERT 3 cols, table LogDeleted(4), is_table: 1, [col_id value] -->R2 - R3*/
+	"9 0 0 1 0 r1 # " + /* TABLE DELETE, table Users(0), tuple pos: R1 */
+	"\u0000*/";
+	
+	public static String EP_DELETE_SHARE =
+			"/*EP \u0001 " + 
+		"2 2 2 -1 2 ?1 # " + /* CI_LOOKUP ref_tab:Shares(2) key_col_id:8 ka_id:2	 key:?1(R0) -->R1 */
+		"5 1 1 2 3 4 1 17 v12 18 r1 19 v10 # " + /* TABLE_INSERT 3 cols, table LogDeleted(4), is_table: 1, [col_id value] -->R2 - R3*/
+		"9 0 0 1 2 r1 # " + /* TABLE DELETE, table Shares(2), tuple pos: R1 */
+		"\u0000*/";
+	
+	public static String EP_DELETE_ACL =
+			"/*EP \u0001 " + 
+		"2 2 2 -1 3 ?1 # " + /* CI_LOOKUP ref_tab:ACL(3) key_col_id:11 ka_id:3	 key:?1(R0) -->R1 */
+		"5 1 1 2 3 4 1 17 v13 18 r1 19 v10 # " + /* TABLE_INSERT 3 cols, table LogDeleted(4), is_table: 1, [col_id value] -->R2 - R3*/
+		"9 0 0 1 3 r1 # " + /* TABLE DELETE, table ACL(3), tuple pos: R1 */
+		"\u0000*/";
+	
+	
 	//test ep
 	public static String EP_TEST =
-			"/*EP \u0001 " + 
-					"0 4 4 3 # " + /* SCAN, Table ACL (3) -->R0 */
-					"1 3 3 4 r0 1 3 1 12 # " + /* TABLE_LOOKUP pos:R0, 1 cols, table ACL(3), is_table: 1  -->R1 - R1 */
-					"4 2 2 3 12 0 ?1 r1 # " + /* SELECT, att: Share(12), comparator: 0, parameter: ?1 (R2), from pos: R1*/
-					"1 1 1 2 r0 1 0 0 1 # " + /* TABLE_LOOKUP pos:R0, 1 cols, skt ACL(0), is_table: 0  -->R3 - R3 */
-					"1 0 0 1 r3 2 0 1 0 1 # " + /* TABLE_LOOKUP pos:R3, 2 cols, table Users(0), is_table: 1  -->R4 - R5 */
-					"\u0000 2 1 4 IdGlobal 0 5 UserID # " + /* META_RESULT, 2 cols, type(0-char 1-num 2-date) [out_result name] */
-					"\u0000*/";
+		"/*EP \u0001 " + 
+				"0 4 4 3 # " + /* SCAN, Table ACL (3) -->R0 */
+				"1 3 3 4 r0 1 3 1 12 # " + /* TABLE_LOOKUP pos:R0, 1 cols, table ACL(3), is_table: 1  -->R1 - R1 */
+				"4 2 2 3 12 0 ?1 r1 # " + /* SELECT, att: Share(12), comparator: 0, parameter: ?1 (R2), from pos: R1*/
+				"1 1 1 2 r0 1 0 0 1 # " + /* TABLE_LOOKUP pos:R0, 1 cols, skt ACL(0), is_table: 0  -->R3 - R3 */
+				"1 0 0 1 r3 2 0 1 0 1 # " + /* TABLE_LOOKUP pos:R3, 2 cols, table Users(0), is_table: 1  -->R4 - R5 */
+				"\u0000 2 1 4 IdGlobal 0 5 UserID # " + /* META_RESULT, 2 cols, type(0-char 1-num 2-date) [out_result name] */
+				"\u0000*/";
 	
 	
 	//manual QEP
@@ -251,6 +280,36 @@ public class EP_ACL {
 		"5 14 14 13 3 0 0 0 r0 1 r1 2 r2 # " + // TABLE_INSERT 3 cols, skt ACL(0), is_table: 0, [col_id value]  
 		"5 0 0 14 6 3 1 12 r13 13 r9 14 r3 15 v0'rw' 16 v0'auth'11 v30 # " + // TABLE_INSERT 6 cols, table ACL(3), is_table: 1, [col_id value] 
 		"\u0000*/";
+	
+	public static String EP_DELETE_MATCH_DOCS = 
+		"/*EP \u0002 " + 
+		"0 7 7 3 # " + /* SCAN, Table ACL (3) -->R0 */
+		"1 6 6 7 r0 2 3 1 11 13 # " + /* TABLE_LOOKUP pos:R0, 2 cols, table ACL(3), is_table: 1  -->R1 - R2 */
+		"4 5 5 6 13 0 ?1 r2 # " + /* SELECT, att: User(13), comparator: 0, parameter: ?2 (R3), from pos: R2*/
+		"1 4 4 5 r0 1 0 0 2 # " + /* TABLE_LOOKUP pos:R0, 1 cols, skt ACL(0), is_table: 0  -->R4 - R4 */
+		"1 3 3 4 r4 1 2 1 9 # " + /* TABLE_LOOKUP pos:R4, 1 cols, table Shares(2), is_table: 1  -->R5 - R5 */
+		"4 2 2 3 9 0 ?2 r5 # " + /* SELECT, att: ShareID(9), comparator: 0, parameter: ?1 (R6), from pos: R5*/
+		
+		
+		"5 1 1 2 3 4 1 17 v13 18 r0 19 v10 # " + // TABLE_INSERT 3 cols, skt ACL(0), is_table: 0, [col_id value]  
+		"9 0 0 1 3 r0 # " + // TABLE DELETE, table ACL(3), tuple pos: R1
+ 		"\u0000*/";
+	
+	public static String EP_DELETE_MATCH_USERS = 
+			"/*EP \u0002 " + 
+			"0 7 7 3 # " + /* SCAN, Table ACL (3) -->R0 */
+			"1 6 6 7 r0 2 3 1 11 14 # " + /* TABLE_LOOKUP pos:R0, 2 cols, table ACL(3), is_table: 1  -->R1 - R2 */
+			"4 5 5 6 14 0 ?1 r2 # " + /* SELECT, att: Doc(14), comparator: 0, parameter: ?2 (R3), from pos: R2*/
+			"1 4 4 5 r0 1 0 0 2 # " + /* TABLE_LOOKUP pos:R0, 1 cols, skt ACL(0), is_table: 0  -->R4 - R4 */
+			"1 3 3 4 r4 1 2 1 9 # " + /* TABLE_LOOKUP pos:R4, 1 cols, table Shares(2), is_table: 1  -->R5 - R5 */
+			"4 2 2 3 9 0 ?2 r5 # " + /* SELECT, att: ShareID(9), comparator: 0, parameter: ?1 (R6), from pos: R5*/
+			
+			
+			"5 1 1 2 3 4 1 17 v13 18 r0 19 v10 # " + // TABLE_INSERT 3 cols, skt ACL(0), is_table: 0, [col_id value]  
+			"9 0 0 1 3 r0 # " + // TABLE DELETE, table ACL(3), tuple pos: R1
+	 		"\u0000*/";
+	
+
 	
 	public static String EP_SELECT_STAR_SKT_ACL = 
 		"/*EP \u0000 " +

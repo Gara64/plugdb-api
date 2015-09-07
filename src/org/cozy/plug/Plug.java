@@ -31,6 +31,10 @@ public class Plug extends Tools implements ITest
 		
 	}
 	
+	/* Init the token and return the boot status : 
+	 * 50 : first init
+	 * 51 : already init
+	 */
 	public int plugInit(String dbmsHost) throws Exception
 	{	
 		run(output, dbmsHost);
@@ -93,7 +97,6 @@ public class Plug extends Tools implements ITest
 		}
 		else {
 			q.queryInsert(Constants.INSERT_USER, userID, sharingRule, "null"); //null (or any value) is needed; empty value are not compared
-			System.out.println("inserted " + userID + " - " + sharingRule);
 		}
 		Save_DBMS_on_disk();
 	}
@@ -230,6 +233,39 @@ public class Plug extends Tools implements ITest
 		return acl;
 	}
 	
+	
+	/* Delete in Doc table  */ 
+	public void plugDeleteDoc(int IdGlobal) throws Exception
+	{
+		int res = q.queryInsert(Constants.DELETE_DOC, String.valueOf(IdGlobal));
+		if(res > 1)
+			System.out.println("Delete " + IdGlobal + " from Doc ok");
+		else
+			System.out.println("Nothig has been deleted");
+		Save_DBMS_on_disk();
+	}
+	/* Delete in User table  */ 
+	public void plugDeleteUser(int IdGlobal) throws Exception
+	{
+		int res = q.queryInsert(Constants.DELETE_USER, String.valueOf(IdGlobal));
+		if(res > 1)
+			System.out.println("Delete " + IdGlobal + " from User ok");
+		else
+			System.out.println("Nothig has been deleted");
+		Save_DBMS_on_disk();
+	}
+	/* Delete in Share table  */ 
+	public void plugDeleteShare(int IdGlobal) throws Exception
+	{
+		int res = q.queryInsert(Constants.DELETE_SHARE, String.valueOf(IdGlobal));
+		if(res > 1)
+			System.out.println("Delete " + IdGlobal + " from Share ok");
+		else
+			System.out.println("Nothig has been deleted");
+		Save_DBMS_on_disk();
+	}
+	
+	
 	/* Match a table for a specified doc/user id + shareid.
 	 * Returns all the [userids, docids] for this share in acl.
 	 * Note that a version that calls INSERT_SELECT_MATCH_... should be implemented
@@ -267,7 +303,6 @@ public class Plug extends Tools implements ITest
 		if ( res > 0 ) {
 			Save_DBMS_on_disk();
 			acl = plugSelectACL(shareID);
-			Save_DBMS_on_disk();
 		}
 		
 		return acl;
@@ -296,6 +331,31 @@ public class Plug extends Tools implements ITest
 		if (tuples.size() > 0 ) {
 			Save_DBMS_on_disk();
 			acl = Util.convertDoubleArrayListIntoString(tuples);
+		}
+		
+		return acl;
+	}
+	
+	public String[][] plugDeleteMatch(int matchingType, int idGlobal, String shareID) throws Exception
+	{
+		System.out.println("delete match for " + idGlobal );
+		String acl[][] = null;
+		int res = 0;
+		
+		if(matchingType == Constants.MATCH_USERS) 
+			res = q.queryInsert(Constants.DELETE_MATCH_USERS, String.valueOf(idGlobal), shareID);
+			
+		else if(matchingType == Constants.MATCH_DOCS)
+			res = q.queryInsert(Constants.DELETE_MATCH_DOCS, String.valueOf(idGlobal), shareID);
+		else
+			return null;
+		
+		System.out.println("deleted " + res + " acl" );
+		
+		// If the match has deleted acl, select all the userid, docid for this share and commit
+		if ( res > 0 ) {
+			Save_DBMS_on_disk();
+			acl = plugSelectACL(shareID);
 		}
 		
 		return acl;
@@ -368,6 +428,7 @@ public class Plug extends Tools implements ITest
 		init();
 		openConnection(dbmsHost, null);
 		
+
 		Globals.BOOT_STATUS = Util.checksPlugState((org.inria.jdbc.Connection)db);
 		System.out.println("plug state : " + Globals.BOOT_STATUS);
 		
@@ -388,8 +449,9 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(Globals.BOOT_STATUS, out, ps, db, perf);
 		
-		//select_stars();
 		//test();
+		//select_stars();
+		
 		//testMatch();
 
 	}
@@ -405,8 +467,16 @@ public class Plug extends Tools implements ITest
 		
 		plugInsertShare("share1", "blah");
 		plugInsertShare("share2", "blah");
+		
+		
+		plugMatchAll(Constants.MATCH_DOCS, "user1", "share1");
+		plugMatchAll(Constants.MATCH_DOCS, "user2", "share2");
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
+		plugDeleteMatch(Constants.MATCH_DOCS, 2, "share1");
+		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
+	
 
-		lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES), out);
+		//lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES), out);
 		//q.queryInsert(Constants.INSERT_ACL, "15", "2", "5", "bl", "bloh");
 		//lireResultSet(q.querySelect(Constants.SELECT_ACL_BY_SHAREID, "share1"), out);
 		//lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
@@ -429,10 +499,14 @@ public class Plug extends Tools implements ITest
 		
 		
 		// SELECT :
-		//lireResultSet( q.querySelect(Constants.MATCH_DOC, "user1", "share1"), out);
+		/*String[][] acl = plugMatchAll(Constants.MATCH_DOCS, "user5", "share1");
+		for(int i=0;i<acl.length;i++)
+		{
+			System.out.println("userid : " + acl[i][0] + " , docid : " + acl[i][1]);
+		}*/
 				
 		// INSERT AS SELECT :
-		lireResultSet( q.querySelect(Constants.INSERT_SELECT_MATCH_DOCS, "user1", "share1"), out);
+		//lireResultSet( q.querySelect(Constants.INSERT_SELECT_MATCH_DOCS, "user1", "share1"), out);
 		//lireResultSet( q.querySelect(Constants.INSERT_SELECT_MATCH_USERS, "doc1", "share1"), out);
 	//	System.out.println("n acl inserted : " + res);
 	 
@@ -441,7 +515,7 @@ public class Plug extends Tools implements ITest
 		//System.out.println("match ret : " + ret);
 		
 		//Save_DBMS_on_disk();
-		Shutdown_DBMS();
+		//Shutdown_DBMS();
 	}
 	
 	public void testMatch() throws Exception {
@@ -506,7 +580,7 @@ public class Plug extends Tools implements ITest
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_DOCS ), out);
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL ), out);
 		
-		Save_DBMS_on_disk();
+		//Save_DBMS_on_disk();
 		Shutdown_DBMS();
 	}
 }

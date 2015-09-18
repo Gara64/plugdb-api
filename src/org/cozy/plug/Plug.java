@@ -271,7 +271,7 @@ public class Plug extends Tools implements ITest
 	 * Note that a version that calls INSERT_SELECT_MATCH_... should be implemented
 	 * to returns only the inserted [userids, docids].
 	 */
-	public String[][] plugMatchAll(int matchingType, String id, String shareID) throws Exception
+	public String[][] plugMatchAll(int matchingType, String[] ids, String shareID) throws Exception
 	{
 		String acl[][] = null;
 		int res = 0;
@@ -288,11 +288,15 @@ public class Plug extends Tools implements ITest
 			return acl;
 		}*/
 		
-		if(matchingType == Constants.MATCH_USERS) 
-			res = q.queryInsert(Constants.INSERT_MATCH_USERS, id, shareID);
+		if(matchingType == Constants.MATCH_USERS) {
+			for(int i=0;i<ids.length;i++)
+				res += q.queryInsert(Constants.INSERT_MATCH_USERS, ids[i], shareID);
+		}
 			
-		else if(matchingType == Constants.MATCH_DOCS)
-			res = q.queryInsert(Constants.INSERT_MATCH_DOCS, id, shareID);
+		else if(matchingType == Constants.MATCH_DOCS) {
+			for(int i=0;i<ids.length;i++)
+				res += q.queryInsert(Constants.INSERT_MATCH_DOCS, ids[i], shareID);
+		}
 
 		else
 			return null;
@@ -449,7 +453,7 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(Globals.BOOT_STATUS, out, ps, db, perf);
 		
-		//test();
+		test();
 		//select_stars();
 		
 		//testMatch();
@@ -461,7 +465,7 @@ public class Plug extends Tools implements ITest
 
 		plugInsertUser("user1", "share1", null);
 		plugInsertUser("user2", "share2", null);
-		for(int i=0;i<10;i++)
+		for(int i=0;i<1000;i++)
 			plugInsertDoc("doc"+i, "share1", null);
 		plugInsertDoc("doc2", "share2", null);
 		
@@ -469,12 +473,13 @@ public class Plug extends Tools implements ITest
 		plugInsertShare("share2", "blah");
 		
 		
-		plugMatchAll(Constants.MATCH_DOCS, "user1", "share1");
-		plugMatchAll(Constants.MATCH_DOCS, "user2", "share2");
+		
+		/*plugMatchAll(Constants.MATCH_DOCS, new String[]{"user1"}, "share1");
+		plugMatchAll(Constants.MATCH_DOCS, new String[]{"user2"}, "share2");
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
 		plugDeleteMatch(Constants.MATCH_DOCS, 2, "share1");
 		lireResultSet(q.querySelect(Constants.SELECT_STAR_ACL), out);
-	
+	*/
 
 		//lireResultSet(q.querySelect(Constants.SELECT_STAR_SHARES), out);
 		//q.queryInsert(Constants.INSERT_ACL, "15", "2", "5", "bl", "bloh");

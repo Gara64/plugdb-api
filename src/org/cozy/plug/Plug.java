@@ -42,38 +42,40 @@ public class Plug extends Tools implements ITest
 	}
 	
 	/* Insert docs ids */ 
-	public void plugInsertDocs(String[] docIds, String sharingRule, String[] userParams) throws Exception
+	public int plugInsertDocs(String[] docIds, String sharingRule, String[] userParams) throws Exception
 	{
-		
+		int res = 0;
 		for(int i=0;i<docIds.length;i++)
 		{
 			System.out.println("Insert doc " + docIds[i] + " for share " + sharingRule);
 			if (userParams != null) {
 				for(int j=0; i<userParams.length; j++)
-					q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, userParams[j]);
+					res += q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, userParams[j]);
 			}
 			else
-				q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, "null"); //null (or any value) is needed; empty value are not compared
+				res += q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, "null"); //null (or any value) is needed; empty value are not compared
 		}
-		Save_DBMS_on_disk();
+		//Save_DBMS_on_disk();
+		return res;
 		
 	}
 	
 	/* Insert users ids */ 
-	public void plugInsertUsers(String[] userIds, String sharingRule, String[] userParams) throws Exception
+	public int plugInsertUsers(String[] userIds, String sharingRule, String[] userParams) throws Exception
 	{
+		int res = 0;
 		
 		for(int i=0;i<userIds.length;i++)
 		{
 			if (userParams != null) {
 				for(int j=0; i<userParams.length; j++)
-					q.queryInsert(Constants.INSERT_USER, userIds[i], sharingRule, userParams[j]);
+					res += q.queryInsert(Constants.INSERT_USER, userIds[i], sharingRule, userParams[j]);
 			}
 			else
-				q.queryInsert(Constants.INSERT_USER, userIds[i], sharingRule, "null"); //null (or any value) is needed; empty value are not compared
+				res += q.queryInsert(Constants.INSERT_USER, userIds[i], sharingRule, "null"); //null (or any value) is needed; empty value are not compared
 		}
 		Save_DBMS_on_disk();
-		
+		return res;
 	}
 	
 	/* Insert in Docs table  */ 
@@ -307,7 +309,7 @@ public class Plug extends Tools implements ITest
 		
 		// If the match has inserted acl, select all the userid, docid for this share and commit
 		if ( res > 0 ) {
-			Save_DBMS_on_disk();
+			//Save_DBMS_on_disk();
 			acl = plugSelectACL(shareID);
 		}
 		
@@ -455,7 +457,7 @@ public class Plug extends Tools implements ITest
 		
 		q = new Queries(Globals.BOOT_STATUS, out, ps, db, perf);
 		
-		test();
+		//test();
 		//select_stars();
 		
 		//testMatch();

@@ -44,8 +44,10 @@ public class Plug extends Tools implements ITest
 	/* Insert docs ids */ 
 	public void plugInsertDocs(String[] docIds, String sharingRule, String[] userParams) throws Exception
 	{
+		
 		for(int i=0;i<docIds.length;i++)
 		{
+			System.out.println("Insert doc " + docIds[i] + " for share " + sharingRule);
 			if (userParams != null) {
 				for(int j=0; i<userParams.length; j++)
 					q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, userParams[j]);

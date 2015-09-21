@@ -45,7 +45,7 @@ public class Plug extends Tools implements ITest
 	public int plugInsertDocs(String[] docIds, String sharingRule, String[] userParams) throws Exception
 	{
 		int res = 0;
-		
+
 		for(int i=0;i<docIds.length;i++)
 		{
 			System.out.println("Insert doc " + docIds[i] + " for share " + sharingRule);
@@ -54,7 +54,7 @@ public class Plug extends Tools implements ITest
 					res += q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, userParams[j]);
 			}
 			else
-				res =+ q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, "null"); //null (or any value) is needed; empty value are not compared
+				res += q.queryInsert(Constants.INSERT_DOC, docIds[i], sharingRule, "null"); //null (or any value) is needed; empty value are not compared
 		}
 		//Save_DBMS_on_disk();
 		
@@ -75,6 +75,7 @@ public class Plug extends Tools implements ITest
 			else
 				res += q.queryInsert(Constants.INSERT_USER, userIds[i], sharingRule, "null"); //null (or any value) is needed; empty value are not compared
 		}
+
 		//Save_DBMS_on_disk();
 		
 		return res;

@@ -12,7 +12,7 @@ import test.jdbc.Tools;
 import test.runner.ITest;
 
 //import org.inria.jdbc.DBMS;
-import test.jdbc.Tools;
+//import test.jdbc.Tools;
 //import test.jdbc.schemaIndexInfo.Tools_schemaIndexInfo;
 
 
@@ -398,7 +398,7 @@ public class Plug extends Tools implements ITest
 	}
 	
 	/* COMMENT BECAUSE OF JDBC */
-	/*public int plugFPAuthentication()
+	public int plugFPAuthentication()
 	{
 		int authId = -1;
 		FingerPrint fp = new FingerPrint(this);
@@ -427,7 +427,7 @@ public class Plug extends Tools implements ITest
 			System.out.println("Authentication timed out, please try again");
 		
 		return authId;
-	}*/
+	}
 	
 	
 	
@@ -438,6 +438,7 @@ public class Plug extends Tools implements ITest
 		
 		init();
 		openConnection(dbmsHost, null);
+		
 		
 
 		Globals.BOOT_STATUS = Util.checksPlugState((org.inria.jdbc.Connection)db);
@@ -459,6 +460,8 @@ public class Plug extends Tools implements ITest
 		}
 		
 		q = new Queries(Globals.BOOT_STATUS, out, ps, db, perf);
+		
+		//plugFPAuthentication();
 		
 		//test();
 		//select_stars();

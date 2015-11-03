@@ -429,45 +429,62 @@ public class Plug extends Tools implements ITest
 		return authId;
 	}
 	
+	public boolean plugIsInit()
+	{
+		int status = Util.checksPlugState((org.inria.jdbc.Connection)db);
+		if(status == Constants.PLUG_INITIALIZED || status == Constants.PLUG_NOT_INITIALIZED)
+			return true;
+		else 
+			return false;
+	}
 	
 	
 	@Override
-	public void run(PrintWriter out, String dbmsHost) throws Exception {
+	public void run(PrintWriter out, String dbmsHost) 
+	{
 		// TODO Auto-generated method stub
 		this.out = out;
 		
-		init();
-		openConnection(dbmsHost, null);
-		
-		
-
-		Globals.BOOT_STATUS = Util.checksPlugState((org.inria.jdbc.Connection)db);
-		System.out.println("plug state : " + Globals.BOOT_STATUS);
-		
-		if(Globals.BOOT_STATUS == Constants.PLUG_NOT_INITIALIZED){
-			plugReset(); //also desinstalls metadata, in case the state is not reliable
-			Util.makesPlugStateInit((org.inria.jdbc.Connection)db);
-		}
-		else if(Globals.BOOT_STATUS == Constants.PLUG_INITIALIZED)
+		try 
 		{
-				//((DBMS) db).bypassInitialization();
-				mStorage.bypassInitialization();
-		}
-		else
-		{
-			System.err.println("Timestamp error. Exit.");
-			System.exit(1);
-		}
+			init();
 		
-		q = new Queries(Globals.BOOT_STATUS, out, ps, db, perf);
-		
-		//plugFPAuthentication();
-		
-		//test();
-		//select_stars();
-		
-		//testMatch();
+			openConnection(dbmsHost, null);
+			
+			plugFPAuthentication();
+	
+			Globals.BOOT_STATUS = Util.checksPlugState((org.inria.jdbc.Connection)db);
+			System.out.println("plug state : " + Globals.BOOT_STATUS);
+			
+			if(Globals.BOOT_STATUS == Constants.PLUG_INITIALIZED)
+			{
+					//((DBMS) db).bypassInitialization();
+					mStorage.bypassInitialization();
+			}
+			else if(Globals.BOOT_STATUS == Constants.PLUG_NOT_INITIALIZED){
+				plugReset(); //also desinstalls metadata, in case the state is not reliable
+				Util.makesPlugStateInit((org.inria.jdbc.Connection)db);
+			}
+			else
+			{
+				System.err.println("Timestamp error. Exit.");
+				System.exit(1);
+			}
+			
+			q = new Queries(Globals.BOOT_STATUS, out, ps, db, perf);
+			
+			//plugFPAuthentication(); //crash if no authentication before
+			
+			//test();
+			//select_stars();
+			
+			//testMatch();
 
+		
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 

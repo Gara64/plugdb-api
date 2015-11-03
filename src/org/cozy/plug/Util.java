@@ -63,16 +63,22 @@ public class Util
 		return tuple;
 	}
 	
-	public static int checksPlugState(org.inria.jdbc.Connection db) throws SQLException
+	public static int checksPlugState(org.inria.jdbc.Connection db)
 	{
-		int ts_spt = db.getGlobalTimestamp();
-		if(ts_spt == 1)
-			return Constants.PLUG_NOT_INITIALIZED;
-		else if(ts_spt > 1)
-			return Constants.PLUG_INITIALIZED;
-		else
-			return Constants.PLUG_TIMESTAMP_ERROR;
-			
+		int ts_spt;
+		try 
+		{
+			ts_spt = db.getGlobalTimestamp();
+
+			if(ts_spt == 1)
+				return Constants.PLUG_NOT_INITIALIZED;
+			else if(ts_spt > 1)
+				return Constants.PLUG_INITIALIZED;
+		
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return Constants.PLUG_TIMESTAMP_ERROR; 
 	}
 	
 	public static void makesPlugStateInit(org.inria.jdbc.Connection db) throws SQLException
